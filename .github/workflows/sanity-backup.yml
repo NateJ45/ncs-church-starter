@@ -1,0 +1,84 @@
+name: Sanity dataset backup
+
+# Nightly export of the production Sanity dataset (documents + assets) so a bad
+# mutation or an accidental "Remove field" in Studio is always recoverable.
+# Ported 2026-08-27 from ncs-astro-sanity-starter's PORTS.md card 6 (reference
+# implementation: presacademy/.github/workflows/sanity-backup.yml).
+#
+# ── THIS REPO IS A TEMPLATE ──────────────────────────────────────────────────
+# ncs-church-starter is not a deployed site. It ships an example dataset
+# (studio/starter-content.ndjson) and, by design, no Sanity project of its own,
+# so there is nothing here worth backing up and the schedule is COMMENTED OUT.
+# It is committed anyway so that a FORK inherits a working backup on day one.
+#
+# To enable in a fork, per site:
+#   1. Set the SANITY_AUTH_TOKEN repo secret (a read token is enough).
+#   2. Set the SANITY_PROJECT_ID repo variable to that site's Sanity project id.
+#      It is NOT a secret -- it ships in the client bundle -- but it is a repo
+#      variable rather than a hardcoded literal precisely because this file is a
+#      template and every fork has a different one.
+#   3. Uncomment the `schedule:` block below.
+# GitHub Actions minutes are free on public repositories, so a public fork can
+# leave the schedule on permanently. On a private fork, weigh the daily minute.
+#
+# The two-job gate (below) is the load-bearing part and is intact: with the
+# secret or the variable missing, the workflow logs a warning and skips rather
+# than failing. That is what makes it safe to commit before either exists.
+# workflow_dispatch stays on, so a manual run always works.
+on:
+  # schedule:
+  #   - cron: '0 7 * * *' # daily 07:00 UTC
+  workflow_dispatch:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        env:
+          TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+          PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$PROJECT_ID" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::SANITY_AUTH_TOKEN secret and/or SANITY_PROJECT_ID variable not set; skipping backup. Expected in the unforked template."
+          fi
+
+  export:
+    needs: gate
+    if: needs.gate.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Export production dataset
+        env:
+          SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+          # This site's PUBLIC Sanity id (not a secret; it ships in the client
+          # bundle). A repo variable, not a literal, because this file is a
+          # template -- see the header.
+          SANITY_STUDIO_PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+          SANITY_STUDIO_DATASET: production
+        run: |
+          STAMP=$(date -u +%Y-%m-%d)
+          npx sanity dataset export production "sanity-backup-$STAMP.tar.gz"
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanity-backup
+          path: sanity-backup-*.tar.gz
+          # GitHub keeps artifacts 90 days. For longer or off-site retention,
+          # push the tarball to R2/S3 here instead.
+          retention-days: 90

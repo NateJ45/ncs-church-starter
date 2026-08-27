@@ -1,0 +1,61 @@
+name: Uptime check
+
+# A lightweight safety net: hourly, confirm the live site's key pages return 200.
+# A failed run notifies you through GitHub. Ported 2026-08-27 from
+# ncs-astro-sanity-starter's PORTS.md card 7 (reference implementation:
+# presacademy/.github/workflows/uptime.yml).
+#
+# ── THIS REPO IS A TEMPLATE ──────────────────────────────────────────────────
+# ncs-church-starter is not deployed anywhere, so there is nothing to ping and
+# the schedule is COMMENTED OUT. It is committed anyway so a FORK inherits a
+# working uptime check on day one.
+#
+# To enable in a fork, per site:
+#   1. Set the SITE_URL repo variable to the live origin
+#      (e.g. https://www.example-church.org).
+#   2. Adjust ROUTES below to that site's real paths, if they were renamed.
+#   3. Uncomment the `schedule:` block.
+# GitHub Actions minutes are free on public repositories, so a public fork can
+# leave the schedule on permanently.
+#
+# The SITE_URL gate (below) is intact: with the variable unset the job logs a
+# warning and exits 0, so it never false-alarms before launch.
+# workflow_dispatch stays on, so a manual run always works.
+#
+# Note: GitHub's scheduler is best-effort and can be delayed under load. This is
+# a safety net, not monitoring. For real monitoring point a dedicated service at
+# the homepage; UptimeRobot's free tier is plenty.
+on:
+  # schedule:
+  #   - cron: '17 * * * *' # hourly, offset off the top of the hour
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check key pages return 200
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          if [ -z "$SITE_URL" ]; then
+            echo "::warning::SITE_URL variable not set; skipping uptime check. Expected in the unforked template."
+            exit 0
+          fi
+          base="${SITE_URL%/}"
+          fail=0
+          # Four routes that exercise four DIFFERENT data paths, not four
+          # variations of the homepage: the page-builder home, a collection
+          # index backed by one document type, a second collection index backed
+          # by another, and a static legal page with no Sanity dependency at
+          # all. If Sanity goes down, /privacy still answers and the diff in the
+          # log tells you where the failure actually is.
+          for path in "/" "/sermons" "/events" "/privacy"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 25 "${base}${path}")
+            echo "${code}  ${base}${path}"
+            if [ "$code" != "200" ]; then fail=1; fi
+          done
+          if [ "$fail" = "1" ]; then
+            echo "::error::One or more key pages did not return HTTP 200."
+            exit 1
+          fi

@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "node scripts/free-dist.mjs",
     "build": "astro build",
     "build:full": "npm run typegen && astro build",
     "preview": "wrangler dev",
@@ -21,6 +22,9 @@
     "studio:deploy": "npm --prefix studio run deploy",
     "rebrand": "node scripts/rebrand.mjs",
     "seed": "node scripts/seed-starter-content.mjs",
+    "parity": "node scripts/page-parity.mjs",
+    "sync-check": "node scripts/sync-check.mjs",
+    "free-dist": "node scripts/free-dist.mjs",
     "test": "node --experimental-strip-types --test src/lib/*.test.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
