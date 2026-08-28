@@ -29,6 +29,7 @@ import {
   SearchIcon,
   ArrowRightIcon,
   CommentIcon,
+  SparkleIcon,
 } from '@sanity/icons';
 
 // The only church-specific copy. Swap these when reusing the template.
@@ -88,7 +89,7 @@ export const guides: Guide[] = [
       { kind: 'h', text: 'When your change shows up on the website' },
       {
         kind: 'p',
-        text: 'When you click **Publish**, the website rebuilds itself and your change appears a few minutes later, not the instant you publish. There is no live preview of a draft inside Sanity, so re-read your text here before you publish. To see it on the real site, open the website in another browser tab after the rebuild.',
+        text: 'When you click **Publish**, the website rebuilds itself and your change appears a few minutes later, not the instant you publish. You do not have to guess in the meantime: open **Preview** (the eye icon at the top of a page) and you get the page as visitors will see it, beside the fields, with your unpublished draft already in it.',
       },
       { kind: 'h', text: 'How the Studio is organized' },
       {
@@ -677,7 +678,14 @@ export const guides: Guide[] = [
         items: [
           'Drag a section by the dots on its left to move it.',
           'Click the three dots on a section and choose **Remove** to delete it.',
+          'In **Preview**, do the same on the page itself: right-click a section for its menu (insert, duplicate, move, remove), or drag its corner tag to a new spot.',
         ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'On the page picture: right-click, not hover',
+        text: 'Open **Preview** and hover a section on the page picture. It outlines, and that is all hovering does. **Right-click inside the outline** and a menu appears: **insert a section before or after it** (a picture picker of every kind), **duplicate** it, **move** it, or **remove** it. The small tag at the outline’s corner is a handle you can drag. That is usually the quickest way, because you are looking at the thing you are moving. The `Page sections` list above does all the same jobs, and is the place to go when a page has no sections yet.',
       },
       { kind: 'h', text: "Change a section's background" },
       {
@@ -687,18 +695,123 @@ export const guides: Guide[] = [
       {
         kind: 'bullets',
         items: [
-          '**Tone**: pick a brand mood (Default, Warm, Chapel green, Chapel deep). The text color adjusts on its own to stay readable.',
+          '**Surface**: pick a background from a row of colored dots (Paper, Warm, Bright card, Chapel green, Chapel deep, Ink). The text color comes with it, so it always stays readable.',
+          '**Accent colour**: the small colour inside the section, for the button and an accent word.',
           '**Image or video**: put a photo or video behind the section. A darkening slider keeps the words readable on top.',
-          '**Spacing**: make the section more or less tall.',
+          '**Vertical spacing**: make the section more or less tall.',
         ],
       },
       {
         kind: 'callout',
         tone: 'primary',
         title: 'It stays on-brand',
-        text: 'You are choosing from set brand options, not raw colors, so whatever you pick looks like it belongs. More on that in the brand guide.',
+        text: 'You are choosing from set brand options, not raw colors, so whatever you pick looks like it belongs. There is a whole guide on this one panel: **Change how a section looks**.',
       },
-      { kind: 'seealso', items: ['The brand: colors & fonts', 'Photos & images'] },
+      {
+        kind: 'seealso',
+        items: ['Change how a section looks', 'The brand: colors & fonts', 'Photos & images'],
+      },
+    ],
+  },
+
+  // -------------------------------------------------------------------------
+  {
+    slug: 'section-appearance',
+    title: 'Change how a section looks',
+    icon: SparkleIcon,
+    lead: 'Give a section a different background, a different accent colour, a bolded word, one word of the heading picked out in colour, or a different arrangement. All of it from the page picture, all of it on-brand.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'Every section carries a **Section background** panel, collapsed at the bottom of its fields. Open it and there are two rows of coloured dots. Nothing in here is a colour picker, and that is on purpose: each dot is a pairing somebody designed, a background together with the text colour that belongs on it. You cannot land on an unreadable combination, because the unreadable combinations are not offered.',
+      },
+
+      { kind: 'h', text: 'Surface: the background of the whole band' },
+      {
+        kind: 'bullets',
+        items: [
+          '**Paper** is the ordinary page. Most sections should be this.',
+          '**Warm** is one quiet step away from Paper. Use it to break a long page into chapters.',
+          '**Bright card** is the clean raised surface. It reads well directly above or below a Warm band.',
+          '**Chapel green** is the signature band, the same green as the footer.',
+          '**Chapel deep** is the heavier green, for a closing band you want to feel final.',
+          '**Ink** is a near-black slab. Use it once on a page, never twice.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'positive',
+        title: 'Why the first three dots are split diagonally',
+        text: 'Paper, Warm and Bright card follow the reader’s own light or dark setting, so their dots show both halves. Chapel green, Chapel deep and Ink are the same colour whatever the reader has chosen, so their dots are solid. The `Aa` inside each dot is the text colour that comes with that background.',
+      },
+
+      { kind: 'h', text: 'Accent colour: the small colour inside the section' },
+      {
+        kind: 'p',
+        text: 'The accent is the button fill and the accent word in the heading. **Bronze** is the house look and is what every section has today, so leaving this alone changes nothing at all. **Chapel green** is quieter and more liturgical. **Ink** is no colour at all, for a section you want to feel plain.',
+      },
+
+      { kind: 'h', text: 'Bold and italic in a subhead' },
+      {
+        kind: 'p',
+        text: 'The short support lines under a heading (Subhead, Intro, Body on the media feature) now come in two boxes. The lower one has a **B** and an *i* button. Type there and you can emphasise a word; the plain box above hides itself once you do, so you are never looking at two boxes that both claim to be the subhead. Leave the rich box empty and nothing changes.',
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'One emphasis, not three',
+        text: 'Bold works because it is rare. A sentence with three bolded phrases in it reads as a ransom note, not as emphasis.',
+      },
+
+      { kind: 'h', text: 'One word of the heading in colour' },
+      {
+        kind: 'steps',
+        items: [
+          'Find **Accent word in the heading**, just under the heading box.',
+          'Type a word or a short phrase that already appears in the heading. Capitals do not matter.',
+          'Publish. That word renders in the section’s accent colour.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'The first match is the one that gets coloured, and one is the limit by design. Two coloured words in one heading stop reading as emphasis and start reading as decoration. This is the colour sibling of the handwritten **script accent** on the big headlines: pick one device per heading, not both.',
+      },
+
+      { kind: 'h', text: 'Layout: how the section is arranged' },
+      {
+        kind: 'p',
+        text: 'Two more controls sit on the section itself rather than in the background panel, and they change the arrangement rather than the colour. Not every section has them, because not every section has more than one arrangement worth putting your name on.',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          '**Which side is the picture on?** on the image + text section, and **Which side is the video or photo on?** on the media feature. Two choices, left or right. Use it to alternate down a long page so two picture sections in a row do not face the same way.',
+          '**How many across** on the card grid, feature cards, stats, the photo gallery, numbered steps and the dynamic list. Pick two, three or four (steps and the dynamic list offer two or three, because a step is a paragraph and does not survive a quarter-width column). Two is the one to reach for when a section holds exactly two things and a three-across row is leaving an empty gap.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'positive',
+        title: 'Phones are not part of the choice',
+        text: 'Every one of these is about the widest screen. On a phone the words always come first and the picture underneath, and the grids always stack (the photo gallery always shows two across). So there is no setting here that can make the site awkward on a phone.',
+      },
+
+      { kind: 'h', text: 'The rest of the background panel' },
+      {
+        kind: 'bullets',
+        items: [
+          '**Background image or video**: put a photo or a video behind the section. The **Overlay darkness** slider dims it so the words stay readable on top.',
+          '**Vertical spacing**: Compact, Normal or Spacious, to make the section shorter or taller. This is the density control: Compact when a short section is floating in too much room, Spacious for a band you want to feel like a pause.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Do it from the page picture',
+        text: 'All of this is easier in **Preview**, where you can see the band change as you pick. Right-click a section on the page picture to reach its menu, or just click the section and its fields open beside it.',
+      },
+      { kind: 'seealso', items: ['Add & arrange sections', 'The brand: colors & fonts'] },
     ],
   },
 

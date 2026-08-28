@@ -1,7 +1,15 @@
 ---
 // Call-to-action band. Inner content only; SectionShell provides the background
 // (defaults to chapel green). Text inherits the section tone color.
+// Appearance controls (2026-08-28): an optional accent word in the headline and
+// the subhead's optional rich twin. Both absent by default.
+import InlineRich from '@/components/InlineRich.astro';
+import { hasInlineRich } from '@/lib/inline-rich';
+import { splitHeadingAccent } from '@/lib/heading-accent';
+
 const { block } = Astro.props as { block: any };
+const ha = splitHeadingAccent(block?.headline, block?.headingAccent);
+const richSubhead = hasInlineRich(block?.subheadRich);
 const isExternal = typeof block?.ctaUrl === 'string' && /^https?:\/\//.test(block.ctaUrl);
 const pill =
   'press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s rounded-full text-xs font-semibold uppercase tracking-[0.18em] bg-primary text-primary-foreground hover:bg-primary-dark transition-colors';
@@ -11,8 +19,18 @@ const pill =
   block?.headline && (
     <div class="mx-auto max-w-3xl px-m text-center">
       {block.eyebrow && <p class="text-xs uppercase tracking-eyebrow text-[#C7A875]">{block.eyebrow}</p>}
-      <h2 class="mt-s font-display text-h2">{block.headline}</h2>
-      {block.subhead && <p class="mt-m opacity-85 leading-relaxed">{block.subhead}</p>}
+      <h2 class="mt-s font-display text-h2">
+        {ha.found ? (
+          <Fragment>{ha.before}<span class="heading-accent">{ha.word}</span>{ha.after}</Fragment>
+        ) : (
+          block.headline
+        )}
+      </h2>
+      {richSubhead ? (
+        <p class="mt-m opacity-85 leading-relaxed"><InlineRich value={block.subheadRich} /></p>
+      ) : (
+        block.subhead && <p class="mt-m opacity-85 leading-relaxed">{block.subhead}</p>
+      )}
       {block.ctaLabel && block.ctaUrl && (
         <div class="mt-l">
           <a href={block.ctaUrl} class={pill} {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>

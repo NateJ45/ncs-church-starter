@@ -1,21 +1,34 @@
 ---
 // Numbered steps ("plan a visit" 1-2-3). Tone-adaptive: text inherits the
 // SectionShell color; the number badge uses the gold accent.
+// Appearance controls (2026-08-28): the intro's optional rich twin, and a
+// column count. Three across is the default and emits the exact class string
+// that was inline here before, so no published section moves.
+import InlineRich from '@/components/InlineRich.astro';
+import { hasInlineRich } from '@/lib/inline-rich';
+import { columnsClass } from '@/lib/layout-variants';
+
 const { block } = Astro.props as { block: any };
 const steps = block?.steps ?? [];
+const richIntro = hasInlineRich(block?.introRich);
+const colClass = columnsClass('sectionSteps', block?.columns);
 ---
 
 {
   block && steps.length > 0 && (
     <div class="mx-auto max-w-content px-m">
-      {(block.eyebrow || block.heading || block.intro) && (
+      {(block.eyebrow || block.heading || block.intro || richIntro) && (
         <div class="max-w-2xl mb-l">
           {block.eyebrow && <p class="text-xs uppercase tracking-eyebrow opacity-70">{block.eyebrow}</p>}
           {block.heading && <h2 class="mt-s font-display text-h2">{block.heading}</h2>}
-          {block.intro && <p class="mt-s opacity-80 leading-relaxed">{block.intro}</p>}
+          {richIntro ? (
+            <p class="mt-s opacity-80 leading-relaxed"><InlineRich value={block.introRich} /></p>
+          ) : (
+            block.intro && <p class="mt-s opacity-80 leading-relaxed">{block.intro}</p>
+          )}
         </div>
       )}
-      <ol class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-l list-none p-0 counter-reset" data-stagger-grid>
+      <ol class={`grid grid-cols-1 ${colClass} gap-l list-none p-0 counter-reset`} data-stagger-grid>
         {steps.map((s: any, i: number) => (
           <li class="flex gap-m">
             <span

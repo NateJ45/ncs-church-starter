@@ -2,27 +2,42 @@
 // Detailed feature cards: optional image/eyebrow/title/body/badge/link per card.
 // Section heading inherits the SectionShell text color (tone-adaptive); the cards
 // themselves are light surfaces (bg-card) with dark text.
+// Appearance controls (2026-08-28): an optional accent word in the heading, the
+// intro's optional rich twin, and the column classes from the shared registry.
 import SanityImage from '@/components/SanityImage.astro';
+import InlineRich from '@/components/InlineRich.astro';
+import { hasInlineRich } from '@/lib/inline-rich';
+import { splitHeadingAccent } from '@/lib/heading-accent';
+import { columnsClass } from '@/lib/layout-variants';
 
 const { block } = Astro.props as { block: any };
 const cards = block?.cards ?? [];
-const COLS: Record<string, string> = {
-  '2': 'sm:grid-cols-2',
-  '3': 'sm:grid-cols-2 lg:grid-cols-3',
-  '4': 'sm:grid-cols-2 lg:grid-cols-4',
-};
-const colClass = COLS[block?.columns ?? '3'] ?? COLS['3'];
+const ha = splitHeadingAccent(block?.heading, block?.headingAccent);
+const richIntro = hasInlineRich(block?.introRich);
+const colClass = columnsClass('sectionFeatureCards', block?.columns);
 const archCls = block?.arched ? 'arch-top-sm' : 'rounded-md';
 ---
 
 {
   block && cards.length > 0 && (
     <div class="mx-auto max-w-content px-m">
-      {(block.eyebrow || block.heading || block.intro) && (
+      {(block.eyebrow || block.heading || block.intro || richIntro) && (
         <div class="max-w-2xl">
           {block.eyebrow && <p class="text-xs uppercase tracking-eyebrow opacity-70">{block.eyebrow}</p>}
-          {block.heading && <h2 class="mt-s font-display text-h2">{block.heading}</h2>}
-          {block.intro && <p class="mt-s opacity-80 leading-relaxed">{block.intro}</p>}
+          {block.heading && (
+            <h2 class="mt-s font-display text-h2">
+              {ha.found ? (
+                <Fragment>{ha.before}<span class="heading-accent">{ha.word}</span>{ha.after}</Fragment>
+              ) : (
+                block.heading
+              )}
+            </h2>
+          )}
+          {richIntro ? (
+            <p class="mt-s opacity-80 leading-relaxed"><InlineRich value={block.introRich} /></p>
+          ) : (
+            block.intro && <p class="mt-s opacity-80 leading-relaxed">{block.intro}</p>
+          )}
         </div>
       )}
       <div class={`mt-l grid grid-cols-1 ${colClass} gap-m`} data-stagger-grid>

@@ -1,18 +1,27 @@
 ---
 // FAQ / accordion block. Native <details> (no JS), tone-adaptive: text inherits
 // the SectionShell color and borders use currentColor so it reads on any tone.
+// Appearance controls (2026-08-28): the intro's optional rich twin.
+import InlineRich from '@/components/InlineRich.astro';
+import { hasInlineRich } from '@/lib/inline-rich';
+
 const { block } = Astro.props as { block: any };
 const items = block?.items ?? [];
+const richIntro = hasInlineRich(block?.introRich);
 ---
 
 {
   block && items.length > 0 && (
     <div class="mx-auto max-w-3xl px-m">
-      {(block.eyebrow || block.heading || block.intro) && (
+      {(block.eyebrow || block.heading || block.intro || richIntro) && (
         <div class="mb-l">
           {block.eyebrow && <p class="text-xs uppercase tracking-eyebrow opacity-70">{block.eyebrow}</p>}
           {block.heading && <h2 class="mt-s font-display text-h2">{block.heading}</h2>}
-          {block.intro && <p class="mt-s opacity-80 leading-relaxed">{block.intro}</p>}
+          {richIntro ? (
+            <p class="mt-s opacity-80 leading-relaxed"><InlineRich value={block.introRich} /></p>
+          ) : (
+            block.intro && <p class="mt-s opacity-80 leading-relaxed">{block.intro}</p>
+          )}
         </div>
       )}
       <div class="divide-y divide-current/15 border-t border-b border-current/15">

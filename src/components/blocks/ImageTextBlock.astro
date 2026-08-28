@@ -4,13 +4,15 @@
 // dark tones via descendant overrides.
 import SanityImage from '@/components/SanityImage.astro';
 import PortableText from '@/components/PortableText';
+import { DARK_SURFACES } from '@/lib/surfaces';
 
 const { block, defaultTone = 'default' } = Astro.props as { block: any; defaultTone?: string };
 const imageRight = (block?.imageSide ?? 'right') !== 'left';
 const archCls = block?.arched ? 'arch-top-sm' : 'rounded-md';
 const hasImage = !!block?.image?.asset;
 const tone = block?.background?.tone ?? defaultTone;
-const onDark = !!(block?.background?.image?.asset || block?.background?.videoUrl) || tone === 'chapel' || tone === 'chapelDeep';
+// See RichTextBlock: every fixed dark surface belongs here, "ink" included.
+const onDark = !!(block?.background?.image?.asset || block?.background?.videoUrl) || DARK_SURFACES.has(tone);
 const ptDark = onDark
   ? '[&_p]:text-current [&_h3]:text-current [&_h4]:text-current [&_li]:text-current [&_a]:text-current [&_strong]:text-current'
   : '';

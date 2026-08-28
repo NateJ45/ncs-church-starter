@@ -71,6 +71,13 @@ export const PAGE_CHECK_CONFIG: PageCheckConfig = {
     fields: ['heroEyebrow', 'heroHeadline', 'heroSubhead', 'heroImage'],
   },
   selfFillingSections: SELF_FILLING_SECTIONS,
+  // Enum keys that hold a SETTING rather than words, on top of the built-in
+  // SETTING_KEYS list in src/lib/page-checks.ts. Every one of these arrives
+  // with an initialValue, so a completely empty section already carries them:
+  // counted as content, the "nothing typed here" check would go permanently
+  // silent. `tone`, `columns` and `background` are already built in; `accent`
+  // (2026-08-28, PORTS.md card 26) and the two side controls are not.
+  extraSettingKeys: ['accent', 'imageSide', 'mediaSide', 'padding', 'surface'],
   // Every built-in route (see src/pages/), plus the folders the build writes
   // into. A link to /events/harvest-supper is fine even though no `page`
   // document owns it: the route is built from the Events collection.

@@ -8,15 +8,13 @@
 // the page. We use aria-label="Photo gallery" as a fallback; when a heading IS
 // present we use aria-labelledby so the heading text doubles as the label.
 import SanityImage from '@/components/SanityImage.astro';
+// The column classes moved to src/lib/layout-variants.ts (2026-08-28), which
+// holds this block's map verbatim. Same strings, one place.
+import { columnsClass } from '@/lib/layout-variants';
 
 const { block } = Astro.props as { block: any };
 const images = (block?.images ?? []).filter((i: any) => i?.asset);
-const COLS: Record<string, string> = {
-  '2': 'grid-cols-2',
-  '3': 'grid-cols-2 sm:grid-cols-3',
-  '4': 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4',
-};
-const colClass = COLS[block?.columns ?? '3'] ?? COLS['3'];
+const colClass = columnsClass('sectionGallery', block?.columns);
 
 // Stable heading ID for aria-labelledby when a heading is present.
 const headingId = block?.heading

@@ -5,12 +5,22 @@
 // Sets the base text color so the block content inside inherits it (cream on the
 // chapel tones, white over media). Block components render tone-neutral content
 // (no hardcoded section background), so a single editor control restyles them.
+//
+// APPEARANCE CONTROLS (PORTS.md card 26, 2026-08-28). The surface list and the
+// accent list both come from src/lib/surfaces.ts, which is the one place their
+// classes, their swatch colours and the contrast gate all read. Two rules hold
+// here:
+//   - the four original tone values emit exactly the classes they always did,
+//   - the default accent (bronze) emits NO class,
+// so every already-published section renders byte-identical HTML. The parity
+// harness (scripts/page-parity.mjs) is what holds that line.
 import { urlFor } from '@/lib/sanity';
+import { accentClass, surfaceClass, type SurfaceValue } from '@/lib/surfaces';
 
 interface Props {
   background?: any;
   /** Tone used when the block has no background tone set. */
-  defaultTone?: 'default' | 'warm' | 'chapel' | 'chapelDeep';
+  defaultTone?: SurfaceValue;
 }
 const { background = null, defaultTone = 'default' } = Astro.props;
 
@@ -21,24 +31,21 @@ const hasMedia = hasImage || !!videoUrl;
 const overlay = Math.min(90, Math.max(0, Number(background?.overlay ?? 55))) / 100;
 const padding = background?.padding ?? 'normal';
 
-const TONE: Record<string, string> = {
-  default: 'bg-background text-foreground',
-  warm: 'surface-warm bg-muted text-foreground',
-  chapel: 'bg-chapel text-chapel-foreground',
-  chapelDeep: 'bg-chapel-deep text-chapel-foreground',
-};
 const PAD: Record<string, string> = {
   compact: 'py-section-md',
   normal: 'py-section-lg',
   spacious: 'py-32',
 };
 
-const toneCls = hasMedia ? 'text-white' : (TONE[tone] ?? TONE.default);
+const toneCls = hasMedia ? 'text-white' : surfaceClass(tone);
 const padCls = PAD[padding] ?? PAD.normal;
+// `accentClass` returns null for the default bronze, which is what keeps the
+// class attribute of an existing section unchanged.
+const accentCls = accentClass(background?.accent);
 const bgImg = hasImage ? urlFor(background.image).width(2000).quality(70).auto('format').url() : null;
 ---
 
-<section class:list={['relative isolate', toneCls, padCls]}>
+<section class:list={['relative isolate', toneCls, padCls, accentCls]}>
   {hasMedia && (
     <div class="absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
       {videoUrl ? (

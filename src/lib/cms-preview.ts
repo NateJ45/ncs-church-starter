@@ -134,6 +134,26 @@ const NON_STEGA_FIELDS = new Set([
   'icon',
   'aspect',
   'ratio',
+  // Appearance controls, 2026-08-28 (PORTS.md card 26). Audited field by field:
+  //   accent         NEW, and exactly the classic case. SectionShell looks it
+  //                  up in a map to pick a class; encoded, it would miss and
+  //                  every section would silently render the default accent in
+  //                  the preview while the live page showed the chosen one.
+  //   headingAccent  NEW, and the sharper case: it is matched against the
+  //                  heading with indexOf, so an encoded value would never find
+  //                  its own word. src/lib/heading-accent.ts ALSO strips both
+  //                  sides with plain() -- belt and braces, because that helper
+  //                  runs on the live site too, where this list does not exist.
+  //   tone           already listed above; unchanged, and now carries two more
+  //                  values ("card", "ink") that select classes the same way.
+  //   columns        already listed above, and it is what the two NEW column
+  //                  controls (sectionSteps, sectionDynamicList) are named.
+  //   imageSide / mediaSide / padding  already listed above; the wave rewords
+  //                  their Studio labels and touches nothing else.
+  // Nothing else in this wave drives logic from a string: the rich twins are
+  // portable text meant to be clicked into, so they KEEP their stega.
+  'accent',
+  'headingAccent',
 ]);
 
 export function getPreviewClient(draftMode: boolean): SanityClient {

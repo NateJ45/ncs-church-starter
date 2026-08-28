@@ -2,12 +2,22 @@
 // Text section block. Inner content only; SectionShell provides the background.
 // Heading/eyebrow inherit the section text color; on dark tones the Portable Text
 // body is forced to inherit (text-current) via descendant overrides so it reads.
+// Appearance controls (2026-08-28): an optional accent word in the heading.
+// Absent by default, and falls through to the exact markup this block rendered
+// before.
 import PortableText from '@/components/PortableText';
+import { splitHeadingAccent } from '@/lib/heading-accent';
+import { DARK_SURFACES } from '@/lib/surfaces';
 
 const { block, defaultTone = 'default' } = Astro.props as { block: any; defaultTone?: string };
+const ha = splitHeadingAccent(block?.heading, block?.headingAccent);
 const centered = block?.align === 'center';
 const tone = block?.background?.tone ?? defaultTone;
-const onDark = !!(block?.background?.image?.asset || block?.background?.videoUrl) || tone === 'chapel' || tone === 'chapelDeep';
+// The dark-band list has to include EVERY fixed dark surface, or the Portable
+// Text body keeps its light-mode ink on a dark slab. "ink" joined the two
+// greens on 2026-08-28; DARK_SURFACES is derived from surfaces.ts's themeStatic
+// flag, so it cannot go stale the way a hand-written pair of comparisons did.
+const onDark = !!(block?.background?.image?.asset || block?.background?.videoUrl) || DARK_SURFACES.has(tone);
 const ptDark = onDark
   ? '[&_p]:text-current [&_h2]:text-current [&_h3]:text-current [&_h4]:text-current [&_li]:text-current [&_a]:text-current [&_strong]:text-current [&_blockquote]:text-current [&_blockquote]:border-current/40'
   : '';
@@ -17,7 +27,15 @@ const ptDark = onDark
   block && (
     <div class={`mx-auto max-w-3xl px-m ${centered ? 'text-center' : ''}`}>
       {block.eyebrow && <p class="text-xs uppercase tracking-eyebrow opacity-70">{block.eyebrow}</p>}
-      {block.heading && <h2 class="mt-s font-display text-h2">{block.heading}</h2>}
+      {block.heading && (
+        <h2 class="mt-s font-display text-h2">
+          {ha.found ? (
+            <Fragment>{ha.before}<span class="heading-accent">{ha.word}</span>{ha.after}</Fragment>
+          ) : (
+            block.heading
+          )}
+        </h2>
+      )}
       {block.body && (
         <div class={`mt-m leading-relaxed ${centered ? 'text-left' : ''} ${ptDark}`}>
           <PortableText value={block.body} />

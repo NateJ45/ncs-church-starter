@@ -568,6 +568,77 @@
     linear-gradient(to bottom, var(--color-chapel), var(--color-chapel-deep));
 }
 
+/* ---------- Section appearance controls (PORTS.md card 26, 2026-08-28) ------
+   The editor-facing half of these lives in src/lib/surfaces.ts, which is the
+   single source of truth for the values below and is what the contrast gate
+   (src/lib/surfaces.test.ts) measures. Do not add a colour here without adding
+   it there.
+
+   Ink band. The third fixed surface, alongside the two greens: a near-black
+   slab that is the same colour on a light or a dark page, carrying warm cream
+   text (13.6:1). Paired with `text-chapel-foreground` by SectionShell. */
+.surface-ink {
+  background-color: var(--color-accent-dark);
+}
+
+/* Section ACCENT. One class on the <section>, and the whole subtree follows,
+   because everything it re-points is already a custom property the components
+   read: `--section-accent` is the accent word inside a heading, and
+   `--color-primary` / `--color-primary-dark` are the fills behind every
+   `bg-primary` / `hover:bg-primary-dark` pill. No block component needed a
+   colour edit, and the DEFAULT accent (bronze) emits no class at all, so every
+   section published before this control renders exactly as it did.
+
+   The fills are static hexes in both themes, matching how the site's primary
+   pill has always worked; the accent-word colour is a theme-aware token so it
+   stays legible on a light or a dark page. */
+.accent-chapel {
+  --section-accent: var(--chapel-ink);
+  --color-primary: #1E423B;
+  --color-primary-dark: #16322C;
+}
+.accent-ink {
+  --section-accent: var(--foreground);
+  --color-primary: #241F1A;
+  --color-primary-dark: #16120F;
+}
+
+/* On the three theme-STATIC bands a theme-aware accent colour would flip with
+   the reader's page theme rather than with the band it sits on, so pin it. The
+   unqualified rule covers the default (bronze) accent; the two-class rules win
+   on specificity for the others. */
+.bg-chapel,
+.bg-chapel-deep,
+.surface-ink {
+  --section-accent: #C7A875;
+}
+.bg-chapel.accent-chapel,
+.bg-chapel-deep.accent-chapel,
+.surface-ink.accent-chapel {
+  --section-accent: #8FC3B2;
+}
+.bg-chapel.accent-ink,
+.bg-chapel-deep.accent-ink,
+.surface-ink.accent-ink {
+  --section-accent: #F1EAD9;
+}
+
+/* The accent WORD inside a heading. The section-accent colour, or the
+   theme-aware bronze the site already uses for its interactive accent when no
+   section sets one. Display-size text, measured at the 3:1 large-text threshold
+   by the gate. This is the colour sibling of the existing .font-script accent;
+   one emphasis device per heading is still the rule. */
+.heading-accent {
+  color: var(--section-accent, var(--primary));
+}
+
+/* The ink band needs the same cream focus ring the green bands get: a bronze
+   ring on a near-black slab is the low-contrast case the base rule above
+   already fixed for .bg-chapel. */
+.surface-ink :focus-visible {
+  outline-color: var(--color-chapel-foreground);
+}
+
 /* Tactile press on primary CTAs. Tap/click depresses ~1px so the press
    registers physically — common Apple-Material trick. */
 .press-tactile {
