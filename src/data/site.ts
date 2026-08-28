@@ -2,7 +2,7 @@
 // Static identity values that don't change between deploys.
 // REPLACE the two placeholders below before launch (or run `node scripts/rebrand.mjs`
 // with your bootstrap.config.json — see docs/bootstrap/NEW-PROJECT.md).
-// Content editors update everything else through Sanity — see studio/ and src/lib/queries.ts.
+// Content editors update everything else through Sanity — see src/sanity/ and src/lib/queries.ts.
 
 /**
  * Derive a localStorage key prefix from the church name.

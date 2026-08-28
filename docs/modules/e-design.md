@@ -14,10 +14,10 @@ considering the module live.
 ### Step 1 -- Copy schemas into the Studio
 
 ```powershell
-Copy-Item modules/e-design/studio/*.ts studio/schemaTypes/
+Copy-Item modules/e-design/studio/*.ts src/sanity/schemaTypes/
 ```
 
-### Step 2 -- Register schemas in `studio/schemaTypes/index.ts`
+### Step 2 -- Register schemas in `src/sanity/schemaTypes/index.ts`
 
 Add one import line and one array entry:
 
@@ -37,7 +37,7 @@ export const schemaTypes = [
 ];
 ```
 
-### Step 3 -- Register in `studio/structure.ts`
+### Step 3 -- Register in `src/sanity/structure.ts`
 
 **a) Add `'eDesignPage'` to `SINGLETON_TYPES`:**
 
@@ -124,7 +124,7 @@ npm run build     # expect PASS; /e-design appears in output
 
 ### Studio desk item
 
-Paste this into the Pages `S.list().items([...])` block in `studio/structure.ts`:
+Paste this into the Pages `S.list().items([...])` block in `src/sanity/structure.ts`:
 
 ```ts
 singletonWithPreview(S, 'eDesignPage', 'E-Design Page', DesktopIcon),

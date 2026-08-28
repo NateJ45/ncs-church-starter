@@ -41,7 +41,10 @@ const cfg = JSON.parse(readFileSync(configPath, 'utf-8'));
 // ── Required-field presence check ──────────────────────────────────────────
 // storageKeyPrefix is no longer required here: site.ts derives it from
 // churchName via slugify(), so it never needs to be manually set.
-for (const key of ['churchName', 'shortName', 'wordmarkLine2', 'domain', 'workerName', 'studioHost', 'city', 'addressLine', 'cityStateZip', 'email', 'pastorEmail', 'phone']) {
+// studioHost is no longer required either: there is no hosted *.sanity.studio
+// deploy since the Studio was embedded at /studio (2026-08-28), so sanity.cli.ts
+// carries no studioHost to stamp.
+for (const key of ['churchName', 'shortName', 'wordmarkLine2', 'domain', 'workerName', 'city', 'addressLine', 'cityStateZip', 'email', 'pastorEmail', 'phone']) {
   if (typeof cfg[key] !== 'string' || cfg[key].trim() === '') {
     console.error(`bootstrap.config.json is missing or empty: "${key}".`);
     process.exit(1);
@@ -92,8 +95,8 @@ const REPLACEMENTS = [
   ['(555) 555-0100', cfg.phone],
   ['www.example-church.org', `www.${cfg.domain}`],
   ['example-church.org', cfg.domain],
-  // studioHost placeholder (sanity.cli.ts) — after the domain so the dot-form wins first.
-  ['example-church', cfg.studioHost],
+  // The bare 'example-church' studioHost pair was dropped 2026-08-28 with the
+  // hosted Studio: sanity.cli.ts no longer carries a studioHost placeholder.
   ['of Springfield', cfg.wordmarkLine2],
   ['First Church', cfg.shortName],
   ['Springfield', cfg.city],
@@ -103,7 +106,9 @@ const REPLACEMENTS = [
 ];
 
 // Files swept. sanity.types.ts is skipped (regenerate with `npm run typegen`).
-const INCLUDE_DIRS = ['src', 'studio/schemaTypes', 'studio/components', 'studio/guides', 'modules', 'docs/bootstrap', 'scripts'];
+// 2026-08-28: the Studio folded into this package, so its schemas, components
+// and guides moved under src/ and are already covered by the 'src' entry.
+const INCLUDE_DIRS = ['src', 'modules', 'docs/bootstrap', 'scripts'];
 const INCLUDE_FILES = [
   'astro.config.mjs', 'wrangler.jsonc', 'package.json', 'README.md', 'CLAUDE.md',
   // robots.txt is now a build-time endpoint at src/pages/robots.txt.ts and is
@@ -113,7 +118,9 @@ const INCLUDE_FILES = [
   // example-church.org") is replaced. All replacement pairs have been audited against
   // the CSS: they match only inside string literals and pose no syntax risk.
   'src/styles/globals.css',
-  'studio/structure.ts', 'studio/sanity.cli.ts', 'studio/sanity.config.ts', 'studio/package.json',
+  // The Studio config now sits at the repo root (2026-08-28 fold-in);
+  // src/sanity/structure.ts is swept via INCLUDE_DIRS.
+  'sanity.config.ts',
 ];
 const TEXT_EXT = new Set(['.ts', '.tsx', '.astro', '.mjs', '.js', '.json', '.jsonc', '.txt', '.md', '.xml', '.css', '.ndjson']);
 const SKIP = new Set(['node_modules', 'dist', '.astro', '.git', 'sanity.types.ts', 'schema.json']);

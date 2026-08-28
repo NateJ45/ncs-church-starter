@@ -17,11 +17,12 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Install root dependencies
+      # 2026-08-28: one package, one install. The nested studio/ package was
+      # folded into the root with the Sanity 6.4 upgrade, so there is no second
+      # node_modules tree to install (and, crucially, no second copy of
+      # styled-components / @sanity/ui to break the Studio's theme context).
+      - name: Install dependencies
         run: npm ci
-
-      - name: Install studio dependencies
-        run: npm ci --prefix studio
 
       - name: Generate Sanity types
         run: npm run typegen
@@ -53,8 +54,9 @@ jobs:
           PUBLIC_SANITY_PROJECT_ID: ""
         run: npm run build
 
-      - name: Build Sanity Studio
-        run: npm --prefix studio run build
+      # The Studio is no longer built separately: `astro build` above builds it
+      # as part of the site (@sanity/astro mounts it at /studio). A standalone
+      # `sanity build` would write to ./dist and clobber the Astro output.
 
       - name: Run tests
         run: npm test

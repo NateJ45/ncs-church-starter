@@ -11,7 +11,7 @@
 // item) and sanity.config.ts (SINGLETON_TYPES set + urlForDoc case).
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
-import { FLEXIBLE_SECTION_MEMBERS } from './blocks';
+import { FLEXIBLE_SECTION_MEMBERS, sectionArrayOptions } from './blocks';
 
 interface PageDefaults {
   heroEyebrow?: string;
@@ -119,6 +119,10 @@ export function definePageSingleton(
         group: 'sections',
         description: 'Add on-brand sections to this page (text, image + text, cards, quote, CTA band, form, embed). They render below the built-in page content. Drag to reorder.',
         of: FLEXIBLE_SECTION_MEMBERS,
+        // PORTS.md card 17: the grouped, searchable insert menu shared by every
+        // sections array, so the in-canvas + control in the Studio preview opens
+        // plain-language groups instead of one flat list of type names.
+        options: sectionArrayOptions,
       }),
       // The closing call-to-action button at the very bottom of the page. The
       // eyebrow / headline / subhead above it are the per-page finalCta* (or

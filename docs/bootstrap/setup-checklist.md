@@ -15,14 +15,21 @@ cutover.
 - [ ] Wordmark lines read right in header, footer, mobile menu (`site.ts` → `wordmark`)
 
 ## Sanity
-- [ ] Project created; `.env` + `studio/.env` filled; tokens marked Secret in Cloudflare
+- [ ] Project created; `.env` filled (`PUBLIC_SANITY_PROJECT_ID` + `SANITY_STUDIO_PROJECT_ID` + the read/write tokens); tokens marked Secret in Cloudflare. There is no `studio/.env`.
 - [ ] `npm run seed -- --apply` imported the starter content
 - [ ] Site Settings fully populated (identity, socials, give/watch URLs, worship time, nav, footer)
 - [ ] Geo coordinates set in Site Settings (Latitude + Longitude): right-click the building in Google Maps and copy the coordinates from the context menu. These power the `geo` block in the Church structured-data schema (JSON-LD). Leave blank to omit the geo block rather than shipping wrong coordinates.
 - [ ] Real page copy in (home, visit, believe, staff bios, ministries)
 - [ ] Forms: Web3Forms key set; contact + connect card + prayer request tested end-to-end
-- [ ] Studio deployed (`npm run studio:deploy`); appId pinned in `sanity.cli.ts`
+- [ ] `/studio` opens on the DEPLOYED site and the desk renders (not just the login screen). There is no separate Studio deploy: the site deploy is the Studio deploy.
 - [ ] Editor accounts invited; help-center guides walked through
+
+## Live preview (fork activation)
+- [ ] `SANITY_TOKEN` set as a Worker runtime secret (`npx wrangler secret put SANITY_TOKEN`) AND locally in `.dev.vars`
+- [ ] `npx sanity cors add <origin> --credentials` run for localhost, the workers.dev host, and the custom domain
+- [ ] Under `npm run preview`: Presentation shows DRAFT content, click-to-edit jumps the edit panel to the right field, and an autosave refreshes the preview on its own
+- [ ] Hovering a section in the preview shows the in-canvas insert / duplicate / remove / drag controls, and the insert menu opens the plain-language groups
+- [ ] Before any of the above is configured, `/preview` answers 503 naming what is missing (not a 500) — a quick way to confirm the fail-closed path still works
 - [ ] `node scripts/sanity-audit.mjs --fields` reviewed: no unexpected empty fields, zero stray drafts
 
 ## Cloudflare & launch

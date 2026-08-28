@@ -25,13 +25,39 @@ import DynamicListBlock from '@/components/blocks/DynamicListBlock.astro';
 import ArchShowcaseBlock from '@/components/blocks/ArchShowcaseBlock.astro';
 import FaqListBlock from '@/components/blocks/FaqListBlock.astro';
 import EmbedBlock from '@/components/EmbedBlock.astro';
+import { sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
 
 interface Props {
   sections?: any[] | null;
   /** Passed to form blocks for the keyless mailto fallback. */
   fallbackEmail?: string;
+  /**
+   * PREVIEW ONLY. When the Studio preview route passes the document each
+   * section belongs to, every section is wrapped in a real block box carrying a
+   * `data-sanity` attribute, which is what gives the Presentation overlay its
+   * in-canvas insert / duplicate / remove / drag-to-reorder controls
+   * (PORTS.md card 17).
+   *
+   * The live pages never pass it, and with it absent the wrapper is a
+   * `<Fragment>`, which renders NOTHING at all. That is why the static build's
+   * markup stays byte-identical with this feature installed, and
+   * `npm run parity compare` is the standing gate on that promise.
+   *
+   * `editDoc.field` matters here: singletons keep their sections in
+   * `flexibleSections`, the generic `page` type in `sections`. The preview
+   * route picks the right one.
+   */
+  editDoc?: EditDoc;
 }
-const { sections = [], fallbackEmail } = Astro.props;
+const { sections = [], fallbackEmail, editDoc } = Astro.props;
+
+// A real element in preview, nothing at all on the live site. The wrapper must
+// NOT be `display: contents`: the overlay outlines the element's rect, and a
+// contents element has none. A plain block-level div around a full-width
+// <section> changes no layout.
+const Wrap = editDoc ? 'div' : Fragment;
+const wrapAttrs = (key: string | undefined) =>
+  editDoc && key ? { 'data-sanity': sectionEditAttr(editDoc, key) } : {};
 
 const MAP: Record<string, any> = {
   sectionRichText: RichTextBlock,
@@ -73,14 +99,18 @@ const DEFAULT_TONE: Record<string, string> = {
   (sections ?? []).map((block: any) => {
     const Cmp = MAP[block?._type];
     if (!Cmp) return null;
-    if (SHELL_AWARE.has(block._type)) {
-      const dt = DEFAULT_TONE[block._type] ?? 'default';
-      return (
-        <SectionShell background={block.background} defaultTone={dt}>
-          <Cmp block={block} defaultTone={dt} fallbackEmail={fallbackEmail} />
-        </SectionShell>
-      );
-    }
-    return <Cmp block={block} fallbackEmail={fallbackEmail} />;
+    const inner = SHELL_AWARE.has(block._type) ? (
+      (() => {
+        const dt = DEFAULT_TONE[block._type] ?? 'default';
+        return (
+          <SectionShell background={block.background} defaultTone={dt}>
+            <Cmp block={block} defaultTone={dt} fallbackEmail={fallbackEmail} />
+          </SectionShell>
+        );
+      })()
+    ) : (
+      <Cmp block={block} fallbackEmail={fallbackEmail} />
+    );
+    return <Wrap {...wrapAttrs(block?._key)}>{inner}</Wrap>;
   })
 }

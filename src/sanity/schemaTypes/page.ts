@@ -4,7 +4,7 @@
 // singletons; this is for one-off additions.
 
 import { defineType, defineField } from 'sanity';
-import { FLEXIBLE_SECTION_MEMBERS } from './blocks';
+import { FLEXIBLE_SECTION_MEMBERS, sectionArrayOptions } from './blocks';
 
 export const page = defineType({
   name: 'page',
@@ -51,6 +51,10 @@ export const page = defineType({
       group: 'content',
       description: 'Build the page from blocks. Add, remove, and drag to reorder.',
       of: FLEXIBLE_SECTION_MEMBERS,
+      // PORTS.md card 17: the grouped, searchable insert menu shared by every
+      // sections array, so the in-canvas + control in the Studio preview opens
+      // plain-language groups instead of one flat list of type names.
+      options: sectionArrayOptions,
     }),
     defineField({
       name: 'seoTitle',

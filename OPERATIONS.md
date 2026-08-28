@@ -22,7 +22,7 @@ git commit -m "..."
 git push origin main
 ```
 
-Cloudflare detects the push, runs `npm run build` in their CI, and deploys the resulting `dist/` to the Worker. Takes about 1 to 2 minutes. Watch in the Cloudflare dashboard under Workers → [your-worker-name] → Deployments.
+Cloudflare detects the push, runs `npm run build` in their CI, and deploys the resulting `dist/client` (static assets) plus `dist/server` (the SSR bundle) to the Worker. Takes about 1 to 2 minutes. Watch in the Cloudflare dashboard under Workers → [your-worker-name] → Deployments.
 
 **Verify a deploy landed:**
 
@@ -38,8 +38,13 @@ Use `until ! grep -q '...'` (with the bang) when waiting for something to be **r
 
 ```bash
 npm run deploy
-# = npm run build && wrangler deploy
+# = npm run build && wrangler deploy -c dist/server/wrangler.json
 ```
+
+The `-c dist/server/wrangler.json` is load-bearing. Adapter 14 generates that
+config from the root `wrangler.jsonc` plus the routes it just built; a plain
+`wrangler deploy` against the root config 404s every SSR sub-route, `/studio`
+and `/preview/**` included.
 
 Only needed if you're testing a config change locally before committing, or if the auto-deploy webhook is broken.
 
@@ -108,7 +113,7 @@ The live site rebuilds automatically when the scheduled publish fires. You can s
 
 ### Field comments
 
-Sanity Studio includes a built-in Comments feature (the speech-bubble icon that appears next to field labels when you hover). Available by default in Sanity v5, no plugin or config needed.
+Sanity Studio includes a built-in Comments feature (the speech-bubble icon that appears next to field labels when you hover). Available by default in Sanity 6, no plugin or config needed.
 
 **How to use it:**
 
@@ -118,31 +123,24 @@ Sanity Studio includes a built-in Comments feature (the speech-bubble icon that 
 
 Comments stay attached to the specific field until resolved. Comments do not affect published content in any way.
 
-### Studio deploy
+### Studio deploy: there isn't one
 
-Studio code (schemas, structure, plugins) deploys separately from the site:
+Since 2026-08-28 the Studio lives in this package and is served from the site at `/studio`. `astro build` builds it, so **deploying the site IS deploying the Studio** and the two can never disagree. There is no `studio:deploy` script and no hosted `*.sanity.studio` host.
 
-```bash
-npm run studio:deploy
-# = npm --prefix studio run deploy
-```
+**Do not run `npx sanity deploy`.** It would publish a SECOND, standalone Studio that only updates when someone re-runs that command by hand, silently falling behind the embedded one while pointing at the same production data. That is the exact drift this arrangement exists to prevent, which is why `sanity.cli.ts` carries no `studioHost` block.
 
-Run this after any change in `studio/schemaTypes/`, `studio/structure.ts`, or `studio/sanity.config.ts` — otherwise the hosted Studio doesn't see the new schema fields.
+Note also that `sanity build` writes to `./dist` by default and would clobber the Astro build. If you ever need a standalone bundle: `npx sanity build .studio-dist`.
 
-Always run `npm run typegen` after schema changes so `src/lib/sanity.types.ts` is fresh, then commit.
+### After every schema change
 
-### Critical: run studio:deploy after every schema change
-
-If you add or rename a field in a schema file and forget to run `npm run studio:deploy`, the hosted Studio will show "unknown fields" warnings next to the new data, and editors will see a prompt offering to "Remove field." **Do NOT click "Remove field" in Studio.** That action deletes the actual Sanity document data for every document that has that field populated. It cannot be undone without a dataset restore.
+If a Studio ever serves a schema that disagrees with the data, editors see "unknown fields" warnings and a prompt offering to "Remove field." **Do NOT click "Remove field" in Studio.** That deletes the actual Sanity document data for every document that has that field populated, and it cannot be undone without a dataset restore.
 
 The correct sequence after any schema edit:
 
-1. Edit the schema file in `studio/schemaTypes/`.
-2. `npm run typegen` to regenerate `src/lib/sanity.types.ts`.
-3. `npm run studio:deploy` to push the schema update to the hosted Studio.
-4. Commit + push.
-
-The site build can run any time after step 1. The Studio deploy (step 3) is what clears the "unknown fields" warning.
+1. Edit the schema file in `src/sanity/schemaTypes/`.
+2. `npm run typegen` to regenerate `schema.json` and `src/lib/sanity.types.ts`.
+3. **Open `/studio` in a real browser** (`npm run dev`). Schema errors are fatal at browser runtime while passing the build, so a green build proves nothing about the desk.
+4. Commit + push. The deploy carries the schema and the Studio together.
 
 ---
 
@@ -198,7 +196,7 @@ The items below apply to any project built on this starter. Replace the angle-br
 - [ ] Create Sanity project; set `PUBLIC_SANITY_PROJECT_ID`, `PUBLIC_SANITY_DATASET` in `.env` and Cloudflare → Workers → Variables
 - [ ] Set `SANITY_API_READ_TOKEN` (scoped read token from Sanity Manage → API → Tokens)
 - [ ] Set `SANITY_API_WRITE_TOKEN` in `.env` locally for running seed/patch scripts
-- [ ] Run `npm run studio:deploy` to publish the Studio
+- [ ] Open /studio on the deployed site and confirm the desk renders (the site deploy IS the Studio deploy)
 - [ ] Configure the Sanity → Cloudflare rebuild webhook with the deny-list filter (see above)
 
 **Wire external services:**
@@ -340,12 +338,12 @@ The PNGs land in `src/assets/` (NOT `public/`) so Astro's `<Image>` / `getImage(
 
 ### Add a new field to a page singleton
 
-1. Edit `studio/schemaTypes/<page>.ts` — add `defineField(...)`.
+1. Edit `src/sanity/schemaTypes/<page>.ts` — add `defineField(...)`.
 2. `npm run typegen` (runs schema-extract + sanity typegen).
 3. Add the field to the GROQ projection in `src/lib/queries.ts`.
 4. Use the field in the corresponding Astro page with a sensible fallback.
 5. Write a backfill script in `scripts/` to set the value on the existing production doc (use `setIfMissing` so future editor changes aren't clobbered).
-6. `npm run studio:deploy` to push the new field to the hosted Studio.
+6. Open /studio and confirm the new field renders in the form (schema errors are fatal at browser runtime, not at build time).
 7. Commit + push.
 
 ---
@@ -365,7 +363,11 @@ The PNGs land in `src/assets/` (NOT `public/`) so Astro's `<Image>` / `getImage(
 | Playwright `fullPage` screenshot is mostly blank | `[data-reveal]` elements start at `opacity: 0` until the IntersectionObserver fires | `page.evaluate(() => document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('is-visible')))` before screenshot. |
 | Build fails on fresh clone with Sanity query errors | `PUBLIC_SANITY_PROJECT_ID` is not set | Expected — `sanityFetch` returns fallbacks when unconfigured. Set the env var to connect a real project. |
 | Studio shows a field empty but the live site shows a value (or vice versa) | Three different layers can disagree: the published doc (what builds read), a draft overlay (what Studio shows), and the last build's HTML (what visitors see). A stale Studio tab is a fourth suspect. | Run `node scripts/sanity-audit.mjs` — it prints drafts vs published. If published has the value: hard-refresh the Studio tab. If published is right but the site is wrong: trigger a rebuild (`/rebuild`). Never "fix" by re-typing content until you know which layer disagrees. |
-| Image optimizer path mismatch after adapter upgrade | `@astrojs/cloudflare` upgraded past `13.5.5` | Revert to exactly `13.5.5`. See CLAUDE.md gotcha #8. |
+| `wrangler dev`/`deploy` rejects the generated config | `@astrojs/cloudflare` and `wrangler` drifted apart; 4.126+ rejects the `legacy_env` field adapter 14 can emit | Keep them a matched pair: adapter exactly `14.2.4`, wrangler `~4.110.0`. See CLAUDE.md gotcha #8. |
+| Signed-in Studio dies (styled-components error #18, then `reading v2`) while the LOGIN screen renders fine | Two module instances of `styled-components` / `@sanity/ui` means two React contexts | Verify on DISK, not in the lockfile: `find node_modules -path "*@sanity/ui/package.json"` must print ONE line. If an `overrides` entry seems not to work, delete `package-lock.json` + `node_modules` and re-resolve clean. |
+| A dropdown-driven branch renders wrong in the PREVIEW only, right on the live site | Stega encoded ~1KB of invisible markers into the enum string, so `x === 'chapel'` is false | Add the field name to `NON_STEGA_FIELDS` in `src/lib/cms-preview.ts`. Do it the day you add any logic-driving dropdown. |
+| Clicking a link in the Studio preview escapes to the live site and the navigator freezes | The path is missing from `FIRST_SEGMENT_PREVIEWABLE` in `PreviewLayout.astro` | Add it there AND in the other two halves of the map (`src/sanity/resolve.ts`, `src/pages/preview/[...slug].astro`). This one degrades silently. |
+| `/preview` answers 503 | No `PUBLIC_SANITY_PROJECT_ID` and/or no `SANITY_TOKEN` runtime secret | Intentional: the body names exactly what is missing. See docs/bootstrap/NEW-PROJECT.md § 4b. |
 | Featured section shows wrong item as the hero | Falling back to date-based default | Toggle `featured: true` on the item to pin. Sections sort `featured desc, publishedAt desc`. |
 
 ---

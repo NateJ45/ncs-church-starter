@@ -22,8 +22,6 @@ pnpm-debug.log*
 
 # generated artifacts
 tmp/
-studio/schema.json
-studio/dist/
 
 # transient commit message files
 .git-commit-msg.tmp
@@ -36,3 +34,12 @@ studio/dist/
 
 # Local Sanity dataset backups (not versioned)
 backups/
+
+# impeccable live-mode local session journals (the config.json beside them IS tracked)
+.impeccable/live/sessions/
+
+# Sanity CLI + preview runtime artifacts (post-fold, 2026-08-28)
+schema.json
+.sanity/
+.dev.vars
+scripts/.asset-map.json

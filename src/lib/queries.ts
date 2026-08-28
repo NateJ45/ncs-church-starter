@@ -11,14 +11,18 @@
 
 import { sanityFetch } from './sanity';
 
-// Common Portable Text + image projection shorthand
-const IMAGE_PROJECTION = `{
+// Common Portable Text + image projection shorthand.
+// IMAGE_PROJECTION / CTA_PROJECTION / SECTION_MEMBERS are EXPORTED (2026-08-28)
+// so the Studio preview route (src/pages/preview/[...slug].astro) builds its
+// one-off draft projection out of the SAME pieces the live pages use, instead
+// of a second copy that can drift.
+export const IMAGE_PROJECTION = `{
   ...,
   asset->,
   "alt": coalesce(alt, asset->altText, "")
 }`;
 
-const CTA_PROJECTION = `{
+export const CTA_PROJECTION = `{
   ...,
   internalLink->{ _type, "slug": slug.current }
 }`;
@@ -35,7 +39,7 @@ const FORM_PROJECTION = `{
 
 // Page-builder block members (flexibleSections[] / page.sections[]). Resolves
 // image + form references; other blocks carry their fields via the spread.
-const SECTION_MEMBERS = `{
+export const SECTION_MEMBERS = `{
   ...,
   background{ ..., image${IMAGE_PROJECTION} },
   _type == "sectionImageText" => { image${IMAGE_PROJECTION} },

@@ -19,7 +19,7 @@ Run the read-only dataset audit and interpret the results for the user.
    - **A missing singleton** means a page renders entirely from code fallbacks.
    - In `--fields` output, most "absent" fields are intentional optionals
      (`seoImage`, `flexibleSections`, `heroScriptAccent`, integration URLs,
-     `favicon`). Check the schema description in `studio/schemaTypes/` before
+     `favicon`). Check the schema description in `src/sanity/schemaTypes/` before
      calling a gap a problem. Starter-dataset documents (`*-starter-*` ids and
      the seeded singletons) intentionally fill only the core fields.
 

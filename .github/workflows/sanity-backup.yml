@@ -7,7 +7,7 @@ name: Sanity dataset backup
 #
 # ── THIS REPO IS A TEMPLATE ──────────────────────────────────────────────────
 # ncs-church-starter is not a deployed site. It ships an example dataset
-# (studio/starter-content.ndjson) and, by design, no Sanity project of its own,
+# (scripts/starter-content.ndjson) and, by design, no Sanity project of its own,
 # so there is nothing here worth backing up and the schedule is COMMENTED OUT.
 # It is committed anyway so that a FORK inherits a working backup on day one.
 #

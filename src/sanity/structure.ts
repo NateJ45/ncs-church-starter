@@ -99,7 +99,7 @@ function singleton(
 
 /**
  * "How This Works" — a pinned, read-only help center built from repo data
- * (studio/guides/content.tsx), rendered by GuideView. Lives in code so staff
+ * (src/sanity/guides/content.tsx), rendered by GuideView. Lives in code so staff
  * can't edit or delete it and every future client site inherits it. Each guide
  * is a navigable item that opens its own component pane.
  */

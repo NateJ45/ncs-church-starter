@@ -21,9 +21,12 @@ which files change freely and which need a planned session.
 
 ```bash
 git clone <this-starter> <church-name> && cd <church-name>
-npm install && npm --prefix studio install
+npm install
 npm run build
 ```
+
+One package, one install: the Studio lives in this repo and is built by
+`astro build` (there has been no nested `studio/` package since 2026-08-28).
 
 The build MUST pass with no `.env` at all: pages render placeholder
 empty-state content. If it doesn't, stop and fix before customizing
@@ -34,7 +37,8 @@ empty-state content. If it doesn't, stop and fix before customizing
 ```bash
 cp bootstrap.config.example.json bootstrap.config.json
 # fill in: church name, short name, wordmark line 2, domain, city, address,
-# emails, phone, worker name, studio host
+# emails, phone, worker name
+# (no studio host: there is no hosted *.sanity.studio deploy any more)
 npm run rebrand              # CHECK mode: see what would change (nothing written)
 npm run rebrand -- --apply   # APPLY mode: writes all replacements
 git diff                     # the diff IS the rebrand; review it
@@ -61,7 +65,7 @@ Serif + Newsreader). To reskin for the new church:
 3. Swap `@fontsource` imports + `--font-display`/`--font-body` if changing type.
 4. `scripts/generate-og-default.mjs` inputs, then `npm run og`.
 5. Favicon + apple-touch-icon in `public/`, church mark in
-   `studio/components/church-mark.png`.
+   `src/sanity/components/church-mark.png`.
 6. Read `design.md` first; it explains the signature moves (arch images,
    structural color bands, keyword emphasis) so a reskin keeps the system.
 
@@ -73,7 +77,10 @@ Build in BOTH light and dark mode (CLAUDE.md rule #3).
 2. `cp .env.example .env` → fill `PUBLIC_SANITY_PROJECT_ID`, create a Viewer
    token (`SANITY_API_READ_TOKEN`) and an Editor token
    (`SANITY_API_WRITE_TOKEN`).
-3. `cp studio/.env.example studio/.env` → same project ID.
+3. In that same `.env`, set `SANITY_STUDIO_PROJECT_ID` to the same project ID.
+   The embedded Studio reads `PUBLIC_SANITY_PROJECT_ID` when Astro bundles it;
+   the `SANITY_STUDIO_*` pair is what the `sanity` CLI reads (typegen, dataset
+   import, cors). There is no `studio/.env` any more.
 4. Seed the starter content (pre-stamped with the bootstrap identity):
 
 ```bash
@@ -83,11 +90,53 @@ npm run seed -- --apply  # imports: siteSettings, home/visit/contact pages,
                          # ready-made forms (contact, connect card, prayer request)
 ```
 
-5. `npm run studio:dev` → walk the Studio as an editor would. Fill the
+5. `npm run dev` → open `/studio` and walk it as an editor would. Fill the
    remaining Site Settings (socials, give URL, worship time) and publish.
-6. First Studio deploy: `npm run studio:deploy` (pick a unique host; then pin
-   the printed appId in `studio/sanity.cli.ts` so future deploys are
-   non-interactive).
+   There is NO separate Studio deploy: the Studio is served from the site at
+   `/studio` and rebuilds with every deploy, so it can never fall behind the
+   schema. Do not run `npx sanity deploy`; it would publish a second, stale
+   Studio at `<host>.sanity.studio` pointed at the same production data.
+
+## 4b. Turn the live preview on (fork activation)
+
+The draft preview and the Squarespace-style in-canvas section controls need
+three things beyond the project id, and until all three are in place every
+preview entry point answers **503 naming exactly what is missing** rather than
+failing with a stack trace. Nothing else on the site is affected: the public
+pages build and serve fine without any of this.
+
+1. **`PUBLIC_SANITY_PROJECT_ID`** in `.env` — the build-time id above. With the
+   placeholder value the preview stays off.
+2. **A `SANITY_TOKEN` Worker RUNTIME secret** (not a build variable, and not the
+   same thing as `SANITY_API_READ_TOKEN`). Create a token with read access to
+   drafts at sanity.io/manage → API → Tokens; Viewer is enough. Locally:
+   `cp .dev.vars.example .dev.vars` and paste it in. In production:
+   `npx wrangler secret put SANITY_TOKEN`.
+3. **CORS for every origin the Studio runs on**, because the embedded Studio
+   talks to the Sanity API from the browser:
+
+```bash
+npx sanity cors add http://localhost:4321 --credentials
+npx sanity cors add https://<your-worker>.workers.dev --credentials
+npx sanity cors add https://www.<your-domain> --credentials
+```
+
+Then verify it FOR REAL, in a browser, under `npm run preview` (which is
+`wrangler dev`; Astro's dev server does not read `.dev.vars` and a static file
+server sends none of the `public/_headers`):
+
+- `/studio` loads and the desk renders (not just the login screen).
+- Open Presentation, and the preview iframe shows DRAFT content.
+- Click a heading in the preview: the edit panel jumps to that field.
+- Hover a section: the overlay outlines it and offers insert / duplicate /
+  remove / drag. Only custom `page` documents preview their whole body; every
+  page singleton previews its editable surface (see the page-model note at the
+  top of `src/pages/preview/[...slug].astro`).
+- Edit and autosave in the Studio: the preview refreshes on its own within a
+  second or two. If it does not, the SSE stream is down; check `/preview/live`.
+
+Rotating `SANITY_TOKEN` invalidates every preview cookie. Editors just reopen
+Presentation.
 
 ## 5. Content load
 
@@ -105,8 +154,13 @@ website audit in `docs/research/` — it is the #1 differentiator.
 ## 6. Cloudflare
 
 1. Push to GitHub. Cloudflare → Workers & Pages → create from repo.
-   Build command `npm run build`, output `dist`. Set the env vars from
-   `.env.example` (mark tokens Secret).
+   Build command `npm run build`, output `dist/client` (adapter 14 splits the
+   build into `dist/client` for assets and `dist/server` for the SSR bundle).
+   Set the env vars from `.env.example` (mark tokens Secret), and add the
+   `SANITY_TOKEN` runtime secret from step 4b.
+   Deploying by hand is `npm run deploy`, i.e.
+   `wrangler deploy -c dist/server/wrangler.json`. A plain `wrangler deploy`
+   against the root config 404s every SSR sub-route, `/studio` included.
 2. `wrangler.jsonc` name was stamped by rebrand; add the custom domain when
    DNS is ready.
 3. **Publish-to-live webhook** (do not skip; without it editors wait for the

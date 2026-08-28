@@ -14,10 +14,10 @@ considering the module live.
 ### Step 1 -- Copy schemas into the Studio
 
 ```powershell
-Copy-Item modules/process/studio/*.ts studio/schemaTypes/
+Copy-Item modules/process/studio/*.ts src/sanity/schemaTypes/
 ```
 
-### Step 2 -- Register schemas in `studio/schemaTypes/index.ts`
+### Step 2 -- Register schemas in `src/sanity/schemaTypes/index.ts`
 
 Add two import lines and two array entries:
 
@@ -39,7 +39,7 @@ export const schemaTypes = [
 ];
 ```
 
-### Step 3 -- Register in `studio/structure.ts`
+### Step 3 -- Register in `src/sanity/structure.ts`
 
 **a) Add `processPage` to `SINGLETON_TYPES`:**
 

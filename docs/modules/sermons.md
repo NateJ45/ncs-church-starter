@@ -11,10 +11,10 @@
 ### Step 1 -- Copy schemas
 
 ```powershell
-Copy-Item modules/sermons/studio/*.ts studio/schemaTypes/
+Copy-Item modules/sermons/studio/*.ts src/sanity/schemaTypes/
 ```
 
-### Step 2 -- Register in `studio/schemaTypes/index.ts`
+### Step 2 -- Register in `src/sanity/schemaTypes/index.ts`
 
 ```ts
 import { sermon } from './sermon';
@@ -28,7 +28,7 @@ export const schemaTypes = [
 ];
 ```
 
-### Step 3 -- Register in `studio/structure.ts`
+### Step 3 -- Register in `src/sanity/structure.ts`
 
 a) Add `'sermonsPage'` to `SINGLETON_TYPES` and `'sermon'` to `HIDDEN_FROM_DEFAULT`.
 b) Add `PlayIcon` to the `@sanity/icons` import.

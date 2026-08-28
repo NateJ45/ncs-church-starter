@@ -11,10 +11,10 @@
 ### Step 1 -- Copy schemas into the Studio
 
 ```powershell
-Copy-Item modules/events/studio/*.ts studio/schemaTypes/
+Copy-Item modules/events/studio/*.ts src/sanity/schemaTypes/
 ```
 
-### Step 2 -- Register schemas in `studio/schemaTypes/index.ts`
+### Step 2 -- Register schemas in `src/sanity/schemaTypes/index.ts`
 
 ```ts
 import { event } from './event';
@@ -28,7 +28,7 @@ export const schemaTypes = [
 ];
 ```
 
-### Step 3 -- Register in `studio/structure.ts`
+### Step 3 -- Register in `src/sanity/structure.ts`
 
 a) Add `'eventsPage'` to `SINGLETON_TYPES` and `'event'` to `HIDDEN_FROM_DEFAULT`.
 b) Add `CalendarIcon` to the `@sanity/icons` import.

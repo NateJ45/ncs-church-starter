@@ -1,7 +1,7 @@
 // Sermons index page singleton. Hero copy + SEO for /sermons.
 
 import { defineType, defineField } from 'sanity';
-import { FLEXIBLE_SECTION_MEMBERS } from './blocks';
+import { FLEXIBLE_SECTION_MEMBERS, sectionArrayOptions } from './blocks';
 
 export const sermonsPage = defineType({
   name: 'sermonsPage',
@@ -69,6 +69,10 @@ export const sermonsPage = defineType({
       type: 'array',
       description: 'Add on-brand sections below the hero (text, image + text, cards, quote, CTA band, form, embed). Drag to reorder.',
       of: FLEXIBLE_SECTION_MEMBERS,
+      // PORTS.md card 17: the grouped, searchable insert menu shared by every
+      // sections array, so the in-canvas + control in the Studio preview opens
+      // plain-language groups instead of one flat list of type names.
+      options: sectionArrayOptions,
     }),
   ],
   preview: { prepare: () => ({ title: 'Sermons (index page)' }) },

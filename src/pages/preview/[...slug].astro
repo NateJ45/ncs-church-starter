@@ -1,0 +1,226 @@
+---
+/* ============================================================================
+   Preview route - draft-aware pages for the Studio Presentation tool
+   (ported from ncs-astro-sanity-starter 2026-08-28; PORTS.md cards 10 + 17)
+   ============================================================================
+   One SSR route renders ANY page in draft mode for the Presentation Tool: it
+   reads the perspective cookie, fetches the doc draft-aware (stega on), and
+   renders sections through the SAME Sections.astro the live pages use, so the
+   preview cannot drift from the page.
+
+   THIS TEMPLATE'S PAGE MODEL, surveyed 2026-08-28. It is the mirror image of
+   the library of record's, and the difference is the whole reason this file
+   reads the way it does.
+
+    1. BUILDER PAGES - exactly ONE type: the generic `page` document, rendered
+       live at /<slug> by src/pages/[slug].astro. Its body IS hero + the
+       `sections` array, so its preview is full-fidelity: the same array
+       through the same renderer. The only things missing are the site header,
+       the footer and the polish layer, which PreviewLayout deliberately leaves
+       out (see its header for why).
+
+    2. BESPOKE PAGES - every page SINGLETON (home, worship, about,
+       what-we-believe, music, pastor-staff, grow, serve, kids, food, events,
+       sermons, use-our-space, weddings, give, faq, contact, privacy, 404).
+       Their middles are drawn in code against dozens of named fields (the
+       service band, the weekly rhythms, the staff grid, the event list, the
+       wedding pricing table...), and `flexibleSections` is an APPEND zone that
+       renders BELOW that built-in content. So what previews here is their
+       EDITABLE SURFACE: the hero fields, that append zone, and the closing
+       call to action, with a note on the page saying so.
+
+       Converting a singleton body to the page builder would upgrade its
+       preview for free, but that conversion is a separate job (PORTS.md card
+       12: capture parity first, convert, rebuild, zero diff) and is
+       deliberately not attempted here.
+
+   NOTE THE TWO ARRAY NAMES. Singletons hold their sections in
+   `flexibleSections`; the `page` type holds them in `sections`. Both are
+   projected below and the right one is handed to Sections.astro as the
+   in-canvas edit target (see src/lib/preview-edit-attr.ts).
+
+   Keep the path -> type map in sync with SINGLETON_PREVIEW_PATHS in
+   src/sanity/resolve.ts and FIRST_SEGMENT_PREVIEWABLE in
+   src/layouts/PreviewLayout.astro. noindex comes from PreviewLayout.
+   ============================================================================ */
+export const prerender = false;
+
+import { perspectiveCookieName } from '@sanity/preview-url-secret/constants';
+import PreviewLayout from '@/layouts/PreviewLayout.astro';
+import Hero from '@/components/Hero.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import Sections from '@/components/Sections.astro';
+import { previewFetch, previewConfig, previewUnconfiguredResponse } from '@/lib/cms-preview';
+import { IMAGE_PROJECTION, CTA_PROJECTION, SECTION_MEMBERS } from '@/lib/queries';
+
+// Fresh clone with no project id / no runtime token: say so, do not 500.
+const config = previewConfig();
+if (!config.ok) {
+  return previewUnconfiguredResponse(config.missing);
+}
+
+const draftMode = Astro.cookies.has(perspectiveCookieName);
+const slug = (Astro.params.slug as string | undefined) || '';
+
+// Fixed preview path -> singleton type. Mirror of src/sanity/resolve.ts.
+const SINGLETON_BY_PATH: Record<string, string> = {
+  '': 'homePage',
+  worship: 'worshipPage',
+  about: 'aboutPage',
+  'what-we-believe': 'beliefsPage',
+  music: 'musicPage',
+  'pastor-staff': 'staffPage',
+  grow: 'growPage',
+  serve: 'servePage',
+  kids: 'kidsPage',
+  food: 'foodPage',
+  events: 'eventsPage',
+  sermons: 'sermonsPage',
+  'use-our-space': 'useOurSpacePage',
+  weddings: 'weddingsPage',
+  give: 'givePage',
+  faq: 'faqPage',
+  contact: 'contactPage',
+  privacy: 'privacyPage',
+  '404': 'notFoundPage',
+};
+
+// Every hero / sections / CTA field any of the page types may carry. Absent
+// fields come back null and the components skip them. Deliberately NOT a
+// spread: a preview should show the editable surface, not every internal field.
+const PREVIEW_FIELDS = `{
+  _id, _type, title,
+  seoTitle,
+  heroEyebrow, heroHeadline, heroSubhead,
+  heroImage${IMAGE_PROJECTION},
+  "notFoundEyebrow": eyebrow,
+  "notFoundHeadline": headline,
+  flexibleSections[]${SECTION_MEMBERS},
+  sections[]${SECTION_MEMBERS},
+  finalCtaEyebrow, finalCtaHeadline, finalCtaSubhead,
+  finalCta${CTA_PROJECTION},
+  finalCtaBackgroundImage${IMAGE_PROJECTION}
+}`;
+
+interface PreviewDoc {
+  _id: string;
+  _type: string;
+  title?: string;
+  seoTitle?: string;
+  heroEyebrow?: string;
+  heroHeadline?: string;
+  heroSubhead?: string;
+  heroImage?: unknown;
+  notFoundEyebrow?: string;
+  notFoundHeadline?: string;
+  flexibleSections?: unknown[];
+  sections?: unknown[];
+  finalCtaEyebrow?: string;
+  finalCtaHeadline?: string;
+  finalCtaSubhead?: string;
+  finalCta?: unknown;
+  finalCtaBackgroundImage?: unknown;
+}
+
+const singletonType = SINGLETON_BY_PATH[slug];
+
+const doc = await previewFetch<PreviewDoc | null>(
+  draftMode,
+  singletonType
+    ? `*[_type == $type][0]${PREVIEW_FIELDS}`
+    : `*[_type == "page" && slug.current == $slug][0]${PREVIEW_FIELDS}`,
+  singletonType ? { type: singletonType } : { slug },
+);
+
+if (!doc) {
+  return new Response(
+    `No document found for "${slug || 'home'}". Create it in the Studio, then reopen the preview.`,
+    { status: 404 },
+  );
+}
+
+// The doc id the overlay and /preview/live listen on, read from the QUERY (a
+// Studio-created page has a random id). The draft perspective can return the
+// drafts. twin's id; strip the prefix so the listen filter matches both twins.
+const pageId = doc._id.replace(/^drafts\./, '');
+
+// A custom `page` doc is the only BUILDER page in this template; everything
+// else is a singleton previewing its editable surface.
+const isBuilderPage = !singletonType;
+const sectionField = isBuilderPage ? ('sections' as const) : ('flexibleSections' as const);
+const sections = (isBuilderPage ? doc.sections : doc.flexibleSections) ?? [];
+
+// ---------------------------------------------------------------------------
+// In-canvas section controls (PORTS.md card 17; wired in Phase D)
+// ---------------------------------------------------------------------------
+// The doc and array field each rendered section belongs to. Sections.astro
+// turns this into one `data-sanity` attribute per section, which is what lets
+// the Presentation overlay outline a section and offer insert / duplicate /
+// remove / drag-to-reorder right in the preview instead of only in the
+// Structure panel. See src/lib/preview-edit-attr.ts.
+//
+// Passed regardless of draftMode. The attribute is inert without the Studio's
+// overlay, this route is noindex and never part of the static build, and a
+// preview opened before the cookie lands would otherwise render uncontrollable
+// sections. Unlike the library of record, the field name VARIES here: see the
+// page-model note at the top of this file.
+const editDoc = { id: pageId, type: doc._type, field: sectionField };
+
+// The bespoke pages carry hero fields; the 404 page names them differently.
+const heroHeadline = doc.heroHeadline || doc.notFoundHeadline || '';
+const heroEyebrow = doc.heroEyebrow || doc.notFoundEyebrow || '';
+const showHero = Boolean(heroHeadline || doc.title);
+const hasFinalCta = Boolean(doc.finalCtaHeadline || doc.finalCta);
+
+const label = doc.title || doc.seoTitle || heroHeadline || slug || 'Home';
+const title = `${label} - Preview`;
+---
+
+<PreviewLayout {title} {draftMode} {pageId}>
+  {
+    showHero && (
+      <Hero
+        eyebrow={heroEyebrow}
+        headline={heroHeadline || doc.title || ''}
+        subhead={doc.heroSubhead ?? ''}
+        backgroundImage={(doc.heroImage as never) ?? null}
+        headingId="preview-hero"
+        size="short"
+      />
+    )
+  }
+  {
+    !isBuilderPage && (
+      <div class="mx-auto max-w-3xl px-4 py-6">
+        <p class="border-border-soft bg-bg-soft text-foreground/80 rounded-md border px-4 py-3 text-sm">
+          This page's middle is drawn in code (the lists, grids and bands it is
+          built around), so it previews as its editable surface only: the hero
+          above, any page sections you have added below, and the closing call to
+          action. The parts held in code render on the live site.
+        </p>
+      </div>
+    )
+  }
+  {
+    isBuilderPage && sections.length === 0 && (
+      <div class="mx-auto max-w-3xl px-4 py-6">
+        <p class="border-border-soft bg-bg-soft text-foreground/80 rounded-md border px-4 py-3 text-sm">
+          This page has no sections yet. Add one from the Sections field, or
+          right here in the preview with the plus control.
+        </p>
+      </div>
+    )
+  }
+  <Sections {sections} {editDoc} />
+  {
+    hasFinalCta && (
+      <FinalCta
+        eyebrow={doc.finalCtaEyebrow}
+        headline={doc.finalCtaHeadline}
+        subhead={doc.finalCtaSubhead}
+        cta={doc.finalCta ?? null}
+        backgroundImage={(doc.finalCtaBackgroundImage as never) ?? null}
+      />
+    )
+  }
+</PreviewLayout>

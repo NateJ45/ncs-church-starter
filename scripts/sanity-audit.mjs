@@ -38,7 +38,7 @@ if (!PROJECT || !TOKEN) {
 }
 
 // Expected document types. Keep in sync with SINGLETON_TYPES in
-// studio/sanity.config.ts and the collection schemas in studio/schemaTypes/.
+// sanity.config.ts and the collection schemas in src/sanity/schemaTypes/.
 const EXPECTED_SINGLETONS = [
   'siteSettings', 'homePage', 'aboutPage', 'faqPage', 'contactPage', 'notFoundPage', 'privacyPage',
   'eventsPage', 'sermonsPage', 'worshipPage', 'beliefsPage', 'musicPage', 'staffPage',
@@ -107,10 +107,11 @@ if (drafts.length) console.log('  NOTE: Studio shows the draft; the live build u
 
 // ---- 3: per-document field diff (only with --fields; it is verbose) -------
 if (FIELDS_MODE) {
-  // The extracted schema (studio/schema.json, written by `npm run typegen`)
-  // gives the complete field list per type. Without it, fall back to keys
-  // present on the doc (catches EMPTY but not ABSENT fields).
-  const schemaPath = resolve(root, 'studio/schema.json');
+  // The extracted schema (schema.json at the repo root since the 2026-08-28
+  // studio fold-in, written by `npm run typegen`) gives the complete field list
+  // per type. Without it, fall back to keys present on the doc (catches EMPTY
+  // but not ABSENT fields).
+  const schemaPath = resolve(root, 'schema.json');
   let fieldsByType = null;
   if (existsSync(schemaPath)) {
     const schema = JSON.parse(readFileSync(schemaPath, 'utf-8'));
@@ -120,7 +121,7 @@ if (FIELDS_MODE) {
       fieldsByType[t.name] = Object.keys(t.attributes ?? {}).filter((k) => !SYS.has(k));
     }
   } else {
-    console.log('\n(studio/schema.json not found — run `npm run typegen` for the full absent-field diff)');
+    console.log('\n(schema.json not found — run `npm run typegen` for the full absent-field diff)');
   }
 
   console.log('\n== Field-level audit ==');

@@ -2,7 +2,7 @@
 // Form field options (project types) are wired in the Astro component, not Sanity.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
-import { FLEXIBLE_SECTION_MEMBERS } from './blocks';
+import { FLEXIBLE_SECTION_MEMBERS, sectionArrayOptions } from './blocks';
 
 export const contactPage = defineType({
   name: 'contactPage',
@@ -152,6 +152,10 @@ export const contactPage = defineType({
       group: 'sections',
       description: 'Add on-brand sections to this page (text, image + text, cards, quote, CTA band, form, embed). They render below the built-in content. Drag to reorder.',
       of: FLEXIBLE_SECTION_MEMBERS,
+      // PORTS.md card 17: the grouped, searchable insert menu shared by every
+      // sections array, so the in-canvas + control in the Studio preview opens
+      // plain-language groups instead of one flat list of type names.
+      options: sectionArrayOptions,
     }),
   ],
   preview: { prepare: () => ({ title: 'Contact Page' }) },

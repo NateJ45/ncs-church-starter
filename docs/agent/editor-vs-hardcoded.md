@@ -45,10 +45,10 @@ All identity / contact / social values resolve in ONE place: `src/lib/siteSettin
 
 These are stable design and system decisions that don't belong in editorial:
 
-- **Brand colors / typography tokens** -- declared in `src/styles/globals.css` `@theme` block; the Studio theme mirrors them in `studio/sanity.config.ts`. System-level, not editorial.
+- **Brand colors / typography tokens** -- declared in `src/styles/globals.css` `@theme` block; the Studio theme mirrors them in `sanity.config.ts`. System-level, not editorial.
 - **Page layout & section markup** -- the structure of each page and each block component. Editors change words, images, section order, and backgrounds; the layout is code.
 - **Auto-year copyright** -- computed from `new Date()` at render time. No field needed.
-- **The "How This Works" help guides** -- repo-based and locked on purpose (`studio/guides/content.tsx` + `studio/components/GuideView.tsx`), so staff can't edit or delete the instructions. This replaces the old `studioGuide` / `studioNotes` / `studioPlaybook` singletons.
+- **The "How This Works" help guides** -- repo-based and locked on purpose (`src/sanity/guides/content.tsx` + `src/sanity/components/GuideView.tsx`), so staff can't edit or delete the instructions. This replaces the old `studioGuide` / `studioNotes` / `studioPlaybook` singletons.
 - **Built-in menu fallbacks** -- `FALLBACK_NAV_ITEMS` in `Header.astro` and the default columns in `Footer.astro`. These render only when the editor's `navItems` / `footerColumns` are empty.
 
 > Note: the **navigation is no longer hardcoded** -- the header (`navItems`) and footer columns (`footerColumns`) are editor-driven, with the built-in arrays above as the fallback.
@@ -59,4 +59,4 @@ At the top of each component file, a header comment marks it as either:
 - `// Safe to edit by hand` -- a project maintainer can make changes here without risk of breaking the underlying architecture.
 - `// Foundation, edit with care` -- changes propagate widely; route through a planned session.
 
-If you ever want to flip something from hardcoded to editor-driven, the pattern is: add a field to the appropriate Sanity schema, run `npm run typegen`, update the component to consume the new field with a fallback to the current hardcoded value, run `npm run studio:deploy`, commit. (For a site-wide identity / contact / social value, add it to the resolver in `src/lib/siteSettings.ts` (`resolveSiteSettings`) rather than giving the component its own hardcoded fallback, so it stays single-sourced and an empty field stays visible.)
+If you ever want to flip something from hardcoded to editor-driven, the pattern is: add a field to the appropriate Sanity schema, run `npm run typegen`, update the component to consume the new field with a fallback to the current hardcoded value, open `/studio` to confirm the field renders, commit (the site deploy carries the Studio). (For a site-wide identity / contact / social value, add it to the resolver in `src/lib/siteSettings.ts` (`resolveSiteSettings`) rather than giving the component its own hardcoded fallback, so it stays single-sourced and an empty field stays visible.)

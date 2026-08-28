@@ -5,7 +5,7 @@
 // so the black silhouette always has contrast, whether the Studio chrome is light
 // or dark; the wordmark inherits the header's text color for the same reason.
 // The font is loaded by StudioLayout; Georgia is a graceful serif fallback.
-// Safe to edit by hand. (Vite bundles the PNG import; see studio/global.d.ts.)
+// Safe to edit by hand. (Vite bundles the PNG import; see src/sanity/global.d.ts.)
 
 import React from 'react';
 import churchMark from './church-mark.png';

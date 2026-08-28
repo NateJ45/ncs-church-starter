@@ -666,3 +666,55 @@ export const FLEXIBLE_SECTION_MEMBERS = [
   { type: 'sectionFaqList' },
   { type: 'embed' },
 ];
+
+// =============================================================================
+// The grouped insert menu (PORTS.md card 17, installed 2026-08-28)
+// =============================================================================
+// Card 17 turns each rendered section into an array item the Presentation
+// overlay can outline, with insert-before/after, duplicate, remove and
+// drag-to-reorder IN THE CANVAS. The insert control opens THIS menu, so without
+// it an editor adding a section in the preview would face one flat, unlabelled
+// list of sixteen type names.
+//
+// `filter: true` adds the search box. The group names are plain language on
+// purpose: a church secretary picks "Words and pictures", not "sectionCardGrid".
+//
+// Shared by EVERY sections array in this template (the `flexibleSections`
+// append zone on all the page singletons, and `sections` on the generic `page`
+// type), including any curated per-page subset a fork might introduce: a group
+// whose types are all absent from a given array simply does not render.
+export const SECTION_INSERT_MENU = {
+  filter: true,
+  groups: [
+    {
+      name: 'basics',
+      title: 'Words and pictures',
+      of: ['sectionRichText', 'sectionImageText', 'sectionMediaFeature', 'sectionGallery'],
+    },
+    {
+      name: 'lists',
+      title: 'Lists and cards',
+      of: [
+        'sectionCardGrid',
+        'sectionFeatureCards',
+        'sectionSteps',
+        'sectionAccordion',
+        'sectionFaqList',
+        'sectionDynamicList',
+      ],
+    },
+    {
+      name: 'highlight',
+      title: 'Highlights',
+      of: ['sectionQuote', 'sectionStats', 'sectionLogos', 'sectionArchShowcase'],
+    },
+    {
+      name: 'action',
+      title: 'Ask people to do something',
+      of: ['sectionCtaBand', 'sectionForm', 'embed'],
+    },
+  ],
+} as const;
+
+/** The `options` block every sections array should carry. */
+export const sectionArrayOptions = { insertMenu: SECTION_INSERT_MENU };

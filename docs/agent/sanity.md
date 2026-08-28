@@ -61,13 +61,13 @@ The inline strings in `src/pages/*.astro` are **safety-net fallbacks** (the inli
 - Per-page church singletons (via the `definePageSingleton` factory): `worshipPage` (I'm New), `beliefsPage` (What We Believe), `musicPage`, `staffPage`, `growPage`, `servePage`, `kidsPage`, `foodPage`, `useOurSpacePage`, `weddingsPage`, `givePage`.
 - `page` — generic type for brand-new pages at `/<slug>`, built entirely from the block library.
 
-All page singletons have `seoTitle`/`seoDescription`, a `heroImage` (with alt), editable body-copy fields (with verbatim fallbacks), editable `finalCta*` closing copy, and a `flexibleSections[]` page-builder array. The block library (`studio/schemaTypes/blocks.ts`) and the background/media system are shared across every page; see `page-architecture.md`. Several pages also carry editable structured lists, each with a built-in fallback: weddings (`weddingFaqs` + `weddingPricing`), grow (`groups`), serve (`ways`), use-our-space (`uses`), contact (`contactReasons`), what-we-believe (`resources`), and home (`serviceBand` + `weeklyRhythms`).
+All page singletons have `seoTitle`/`seoDescription`, a `heroImage` (with alt), editable body-copy fields (with verbatim fallbacks), editable `finalCta*` closing copy, and a `flexibleSections[]` page-builder array. The block library (`src/sanity/schemaTypes/blocks.ts`) and the background/media system are shared across every page; see `page-architecture.md`. Several pages also carry editable structured lists, each with a built-in fallback: weddings (`weddingFaqs` + `weddingPricing`), grow (`groups`), serve (`ways`), use-our-space (`uses`), contact (`contactReasons`), what-we-believe (`resources`), and home (`serviceBand` + `weeklyRhythms`).
 
-**In-Studio help** ("How This Works") is NOT a Sanity singleton — it's repo-based, locked code (`studio/guides/content.tsx` + `studio/components/GuideView.tsx`), which replaces the old `studioGuide`/`studioNotes`/`studioPlaybook` singletons.
+**In-Studio help** ("How This Works") is NOT a Sanity singleton — it's repo-based, locked code (`src/sanity/guides/content.tsx` + `src/sanity/components/GuideView.tsx`), which replaces the old `studioGuide`/`studioNotes`/`studioPlaybook` singletons.
 
 ### The deploy rule (read this first)
 
-**Run `npm run studio:deploy` after ANY schema change.** Skip it and the hosted Studio shows "unknown fields" next to a "Remove field" prompt. **Never click "Remove field":** it deletes that field's data across every document and cannot be undone without a dataset restore. Correct sequence: edit schema, `npm run typegen`, `npm run studio:deploy`, commit.
+**There is no separate Studio deploy.** Since 2026-08-28 the Studio is embedded at `/studio` and built by `astro build`, so the site deploy carries the schema and the Studio together and they cannot disagree. Do NOT run `npx sanity deploy`: it would publish a second, standalone Studio that silently falls behind. Correct sequence after a schema edit: edit the schema, `npm run typegen`, open `/studio` in a real browser (schema errors are fatal at BROWSER runtime while passing the build), commit. If a Studio ever does show "unknown fields" next to a "Remove field" prompt, **never click "Remove field":** it deletes that field's data across every document and cannot be undone without a dataset restore.
 
 ### Env-driven config and the graceful-empty build
 
@@ -98,7 +98,7 @@ The `isSanityUnconfigured` guard and the fallback pattern are load-bearing. Do n
 
 The Sanity client is at `src/lib/sanity.ts`. It exports both `client` (the typed CDN client for queries) and `urlFor()` (for building image URLs from asset references).
 
-`npm run typegen` runs `sanity typegen generate` against the schemas in `studio/schemaTypes/` and writes `src/lib/sanity.types.ts`. That file is committed to the repo so collaborators get full type safety without needing to run typegen themselves. Run `npm run typegen` locally after any schema change before testing.
+`npm run typegen` runs `sanity typegen generate` against the schemas in `src/sanity/schemaTypes/` and writes `src/lib/sanity.types.ts`. That file is committed to the repo so collaborators get full type safety without needing to run typegen themselves. Run `npm run typegen` locally after any schema change before testing.
 
 All GROQ queries live in `src/lib/queries.ts`. Each page has a typed query function that pulls the singleton plus any auto-populated collections it needs.
 
@@ -110,7 +110,7 @@ All GROQ queries live in `src/lib/queries.ts`. Each page has a typed query funct
 
 **All-fields default.** The `default: true` property is removed from every schema field group definition. Without it, Studio opens documents on the "All fields" tab instead of a single group, so editors see everything without needing to know which group a field lives in.
 
-**Studio branding.** `studio/sanity.config.ts` sets the Studio title, the brand theme (Bronze / Paper / Ink + the site's serif fonts), a logo (`studio.components.logo` = the church mark + wordmark), and a layout wrapper (`studio.components.layout` = `StudioLayout`, which injects the brand web fonts). Replace the title / theme / logo for each project.
+**Studio branding.** `sanity.config.ts` sets the Studio title, the brand theme (Bronze / Paper / Ink + the site's serif fonts), a logo (`studio.components.logo` = the church mark + wordmark), and a layout wrapper (`studio.components.layout` = `StudioLayout`, which injects the brand web fonts). Replace the title / theme / logo for each project.
 
 **No document preview.** This is a static site (`output: 'static'`) with no draft-preview environment, so documents show the **form only** — there is no iframe "Preview" tab. The old one loaded the last PUBLISHED build (not the editor's draft) and only changed after a rebuild, which misled editors. `urlForDoc` / `SITE_URL_FOR_PREVIEW` stay in `sanity.config.ts` as hooks if a real preview (SSR deploy + Sanity's Presentation tool + draft-mode `sanityFetch`) is added later.
 
@@ -146,6 +146,6 @@ Two schema-level controls govern what Canvas sees:
 
 The `purpose` strings carry compressed voice guidance for each field. These are NOT a hard guardrail -- editors should still apply the project voice in review.
 
-**Deploying Canvas annotation changes:** run `npm run studio:deploy`. Canvas reads the deployed Studio schema, so new `canvasApp.purpose` or `exclude` changes need a Studio redeploy to take effect.
+**Deploying Canvas annotation changes:** deploy the site. Canvas reads the deployed Studio schema, and the Studio deploys with the site now, so new `canvasApp.purpose` or `exclude` changes take effect on the next site deploy.
 
 **Activating Canvas** for the project (one-time): the toggle lives in [manage.sanity.io](https://manage.sanity.io) under the project's Canvas section.

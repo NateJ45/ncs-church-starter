@@ -1,6 +1,6 @@
 # NCS Church Starter
 
-A production-ready church website starter: **Astro 6 + Sanity v5 + Cloudflare Workers**, by [Nixon Creative Studio](https://nixoncreativestudio.com). Fork it, stamp a new church's identity onto it, import the starter content, and you have a polished, editor-friendly church site in an afternoon instead of a month.
+A production-ready church website starter: **Astro 7 + Sanity 6 + Cloudflare Workers**, by [Nixon Creative Studio](https://nixoncreativestudio.com). Fork it, stamp a new church's identity onto it, import the starter content, and you have a polished, editor-friendly church site in an afternoon instead of a month.
 
 ---
 
@@ -17,7 +17,7 @@ It is not a minimal scaffold. It ships with a **Lighthouse 100/100/100/100 basel
 - **Sermons:** livestream call to action, optional podcast links, a featured message, and a per-service archive (bulletin PDF, notes, hymns, who served, liturgical day).
 - **Events:** recurring rhythms and one-time events with categories and registration links.
 - **Connect:** configurable forms (general contact, connect card, prayer request ship as examples), newsletter hooks, and an announcement banner.
-- **Editor experience:** a themed Sanity Studio with an in-Studio help center, status badges, singleton enforcement, and every visible string editable.
+- **Editor experience:** an embedded Sanity Studio at `/studio` with an in-Studio help center, status badges, singleton enforcement, a live draft preview with click-to-edit, and every visible string editable.
 
 ## Design
 
@@ -31,10 +31,11 @@ Extracted from the live [Second Presbyterian Church of Chicago](https://github.c
 
 ## Stack
 
-- **Astro 6** (static output) + TypeScript strict mode
-- **Sanity v5** headless CMS (schemas in `studio/schemaTypes/`)
+- **Astro 7.2** (static output, plus a few SSR routes) + TypeScript strict mode
+- **Sanity 6.4** headless CMS (schemas in `src/sanity/schemaTypes/`), with the **Studio embedded at `/studio`** in this same package: one Studio, rebuilt on every deploy, so it can never drift stale
+- **Live draft preview** at `/preview/**` with click-to-edit and Squarespace-style in-canvas section controls (insert, duplicate, remove, drag to reorder). Off until a fork supplies a project id and a `SANITY_TOKEN`; see `docs/bootstrap/NEW-PROJECT.md`.
 - **Tailwind 4** via `@tailwindcss/vite` (brand tokens in `src/styles/globals.css`)
-- **Cloudflare Workers** hosting via `wrangler deploy`
+- **Cloudflare Workers** hosting via `npm run deploy`
 
 ## Quick start
 
