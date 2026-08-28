@@ -13,6 +13,7 @@ import type { ComponentType } from 'react';
 import {
   RocketIcon,
   CalendarIcon,
+  ClockIcon,
   StarIcon,
   BellIcon,
   HelpCircleIcon,
@@ -617,6 +618,78 @@ export const guides: Guide[] = [
   },
 
   // 12 ---------------------------------------------------------------------
+  {
+    slug: 'publish-later-and-share',
+    title: 'Publish later, and show someone first',
+    icon: ClockIcon,
+    lead: 'Two ways to take the pressure off publishing: set a page to go live on its own at a time you choose, and send a private link so someone can read it before anyone else can.',
+    diy: 'self',
+    body: [
+      { kind: 'h', text: 'Publish later' },
+      {
+        kind: 'p',
+        text: 'Say the stewardship page should go live Monday morning, but you are writing it on Friday night. You do not have to be at a computer on Monday.',
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Finish your edits as usual. Do **not** click Publish.',
+          'Open the **Publishing** tab on the page and find **Publish automatically at**.',
+          'Pick the date and time. The clock is your own local time, the one on your phone.',
+          'Leave the page as a draft and close it. That is all.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Within about half an hour',
+        text: 'The site checks for scheduled pages every thirty minutes, so a page set for 9:00 goes live somewhere between 9:00 and 9:30. Pick a time a little earlier than the moment you actually need it.',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          'Changed your mind? Clear the date before it arrives and nothing happens.',
+          'Want it live right now instead? Just click Publish as usual.',
+          'Once the page publishes itself, the date clears on its own, so it never publishes twice.',
+        ],
+      },
+      { kind: 'h', text: 'Share a draft with someone' },
+      {
+        kind: 'p',
+        text: 'Sometimes a pastor or a committee chair needs to read a page **before** it is public. You do not have to publish it and you do not have to make them a Studio account.',
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page you want them to see.',
+          'Click the **three dots** beside the Publish button and choose **Copy share link**.',
+          'Paste the link into an email or a text message.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'They open it and see the page exactly as your draft has it, with no login. The public website has not changed at all.',
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'The link stops working after about an hour',
+        text: 'That is on purpose, so an old link cannot circulate. If they get to it late and it says the link is invalid, just click **Copy share link** again and send a fresh one. There is no limit on how many you make.',
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'Treat it like a private link',
+        text: 'Anyone holding the link can read that draft. Send it to the person who needs it, not to a public group.',
+      },
+      {
+        kind: 'seealso',
+        items: ['Start here: how it all works', "Edit a page's words & photos"],
+      },
+    ],
+  },
+
+  // 13 ---------------------------------------------------------------------
   {
     slug: 'diy-vs-nathan',
     title: 'Do it yourself vs. call Nathan',

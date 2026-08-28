@@ -5,6 +5,7 @@
 
 import { defineType, defineField } from 'sanity';
 import { FLEXIBLE_SECTION_MEMBERS, sectionArrayOptions } from './blocks';
+import { PUBLISH_AT_GROUP, publishAtField } from './_publishAt';
 
 export const page = defineType({
   name: 'page',
@@ -15,6 +16,7 @@ export const page = defineType({
     { name: 'hero', title: 'Hero' },
     { name: 'content', title: 'Sections' },
     { name: 'seo', title: 'SEO' },
+    PUBLISH_AT_GROUP,
   ],
   fields: [
     defineField({
@@ -35,7 +37,13 @@ export const page = defineType({
     }),
     defineField({ name: 'heroEyebrow', title: 'Hero eyebrow', type: 'string', group: 'hero' }),
     defineField({ name: 'heroHeadline', title: 'Hero headline', type: 'string', group: 'hero' }),
-    defineField({ name: 'heroSubhead', title: 'Hero subhead', type: 'text', rows: 3, group: 'hero' }),
+    defineField({
+      name: 'heroSubhead',
+      title: 'Hero subhead',
+      type: 'text',
+      rows: 3,
+      group: 'hero',
+    }),
     defineField({
       name: 'heroImage',
       title: 'Hero background image',
@@ -61,7 +69,8 @@ export const page = defineType({
       title: 'SEO title',
       type: 'string',
       group: 'seo',
-      validation: (Rule) => Rule.max(60).warning('Titles longer than ~60 characters get cut off in Google.'),
+      validation: (Rule) =>
+        Rule.max(60).warning('Titles longer than ~60 characters get cut off in Google.'),
     }),
     defineField({
       name: 'seoDescription',
@@ -69,7 +78,8 @@ export const page = defineType({
       type: 'text',
       rows: 3,
       group: 'seo',
-      validation: (Rule) => Rule.max(160).warning('Descriptions longer than ~160 characters get cut off in Google.'),
+      validation: (Rule) =>
+        Rule.max(160).warning('Descriptions longer than ~160 characters get cut off in Google.'),
     }),
     defineField({
       name: 'seoImage',
@@ -79,9 +89,15 @@ export const page = defineType({
       options: { hotspot: true },
       fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
     }),
+
+    // Free-tier scheduled publishing; see ./_publishAt.ts.
+    publishAtField(),
   ],
   preview: {
     select: { title: 'title', slug: 'slug.current' },
-    prepare: ({ title, slug }) => ({ title: title || 'Page', subtitle: slug ? `/${slug}` : 'no slug yet' }),
+    prepare: ({ title, slug }) => ({
+      title: title || 'Page',
+      subtitle: slug ? `/${slug}` : 'no slug yet',
+    }),
   },
 });

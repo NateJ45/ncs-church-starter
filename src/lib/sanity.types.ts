@@ -646,109 +646,6 @@ export type FaqItem = {
   displayOrder?: number;
 };
 
-export type PrivacyPage = {
-  _id: string;
-  _type: 'privacyPage';
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  seoTitle?: string;
-  seoDescription?: string;
-  seoImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: 'image';
-  };
-  heroEyebrow?: string;
-  heroHeadline?: string;
-  heroSubhead?: string;
-  heroImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: 'image';
-  };
-  heroScriptAccent?: string;
-  lastUpdated?: string;
-  body?: Array<{
-    children?: Array<{
-      marks?: Array<string>;
-      text?: string;
-      _type: 'span';
-      _key: string;
-    }>;
-    style?: 'normal' | 'h2' | 'h3';
-    listItem?: 'bullet' | 'number';
-    markDefs?: Array<{
-      href?: string;
-      openInNewTab?: boolean;
-      _type: 'link';
-      _key: string;
-    }>;
-    level?: number;
-    _type: 'block';
-    _key: string;
-  }>;
-  flexibleSections?: Array<
-    | ({
-        _key: string;
-      } & SectionRichText)
-    | ({
-        _key: string;
-      } & SectionImageText)
-    | ({
-        _key: string;
-      } & SectionFeatureCards)
-    | ({
-        _key: string;
-      } & SectionCardGrid)
-    | ({
-        _key: string;
-      } & SectionStats)
-    | ({
-        _key: string;
-      } & SectionArchShowcase)
-    | ({
-        _key: string;
-      } & SectionGallery)
-    | ({
-        _key: string;
-      } & SectionAccordion)
-    | ({
-        _key: string;
-      } & SectionMediaFeature)
-    | ({
-        _key: string;
-      } & SectionSteps)
-    | ({
-        _key: string;
-      } & SectionDynamicList)
-    | ({
-        _key: string;
-      } & SectionLogos)
-    | ({
-        _key: string;
-      } & SectionQuote)
-    | ({
-        _key: string;
-      } & SectionCtaBand)
-    | ({
-        _key: string;
-      } & SectionForm)
-    | ({
-        _key: string;
-      } & SectionFaqList)
-    | ({
-        _key: string;
-      } & Embed)
-  >;
-};
-
 export type NotFoundPage = {
   _id: string;
   _type: 'notFoundPage';
@@ -797,17 +694,22 @@ export type SiteSettings = {
     crop?: SanityImageCrop;
     _type: 'image';
   };
+  logo?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
   addressLine?: string;
   cityStateZip?: string;
   geoLat?: number;
   geoLng?: number;
   navItems?: Array<
-    | {
-        label?: string;
-        href?: string;
-        _type: 'navLink';
+    | ({
         _key: string;
-      }
+      } & NavLink)
     | {
         label?: string;
         links?: Array<{
@@ -822,15 +724,33 @@ export type SiteSettings = {
   >;
   footerColumns?: Array<{
     title?: string;
-    links?: Array<{
-      label?: string;
-      href?: string;
-      _type: 'footerLink';
-      _key: string;
-    }>;
+    links?: Array<
+      | ({
+          _key: string;
+        } & NavLink)
+      | {
+          label?: string;
+          href?: string;
+          _type: 'footerLink';
+          _key: string;
+        }
+    >;
     _type: 'footerColumn';
     _key: string;
   }>;
+  headerCta?: {
+    show?: boolean;
+    label?: string;
+    link?: NavLink;
+  };
+  showEmail?: boolean;
+  showSocials?: boolean;
+  showFooterSocials?: boolean;
+  legalNav?: Array<
+    {
+      _key: string;
+    } & NavLink
+  >;
   worshipService?: {
     time?: string;
     day?: string;
@@ -867,6 +787,167 @@ export type SiteSettings = {
     successMessage?: string;
     consentNote?: string;
   };
+};
+
+export type HomePageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'homePage';
+};
+
+export type AboutPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'aboutPage';
+};
+
+export type FaqPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'faqPage';
+};
+
+export type ContactPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'contactPage';
+};
+
+export type EventsPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'eventsPage';
+};
+
+export type SermonsPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'sermonsPage';
+};
+
+export type PrivacyPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'privacyPage';
+};
+
+export type WorshipPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'worshipPage';
+};
+
+export type BeliefsPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'beliefsPage';
+};
+
+export type MusicPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'musicPage';
+};
+
+export type StaffPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'staffPage';
+};
+
+export type GrowPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'growPage';
+};
+
+export type ServePageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'servePage';
+};
+
+export type KidsPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'kidsPage';
+};
+
+export type FoodPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'foodPage';
+};
+
+export type UseOurSpacePageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'useOurSpacePage';
+};
+
+export type WeddingsPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'weddingsPage';
+};
+
+export type GivePageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'givePage';
+};
+
+export type PageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'page';
+};
+
+export type NavLink = {
+  _type: 'navLink';
+  label?: string;
+  linkType?: 'internal' | 'external';
+  internalPage?:
+    | HomePageReference
+    | AboutPageReference
+    | FaqPageReference
+    | ContactPageReference
+    | EventsPageReference
+    | SermonsPageReference
+    | PrivacyPageReference
+    | WorshipPageReference
+    | BeliefsPageReference
+    | MusicPageReference
+    | StaffPageReference
+    | GrowPageReference
+    | ServePageReference
+    | KidsPageReference
+    | FoodPageReference
+    | UseOurSpacePageReference
+    | WeddingsPageReference
+    | GivePageReference
+    | PageReference;
+  externalUrl?: string;
+  href?: string;
 };
 
 export type SectionFaqList = {
@@ -1169,6 +1250,109 @@ export type SectionRichText = {
   background?: Background;
 };
 
+export type PrivacyPage = {
+  _id: string;
+  _type: 'privacyPage';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  heroEyebrow?: string;
+  heroHeadline?: string;
+  heroSubhead?: string;
+  heroImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  heroScriptAccent?: string;
+  lastUpdated?: string;
+  body?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: 'span';
+      _key: string;
+    }>;
+    style?: 'normal' | 'h2' | 'h3';
+    listItem?: 'bullet' | 'number';
+    markDefs?: Array<{
+      href?: string;
+      openInNewTab?: boolean;
+      _type: 'link';
+      _key: string;
+    }>;
+    level?: number;
+    _type: 'block';
+    _key: string;
+  }>;
+  flexibleSections?: Array<
+    | ({
+        _key: string;
+      } & SectionRichText)
+    | ({
+        _key: string;
+      } & SectionImageText)
+    | ({
+        _key: string;
+      } & SectionFeatureCards)
+    | ({
+        _key: string;
+      } & SectionCardGrid)
+    | ({
+        _key: string;
+      } & SectionStats)
+    | ({
+        _key: string;
+      } & SectionArchShowcase)
+    | ({
+        _key: string;
+      } & SectionGallery)
+    | ({
+        _key: string;
+      } & SectionAccordion)
+    | ({
+        _key: string;
+      } & SectionMediaFeature)
+    | ({
+        _key: string;
+      } & SectionSteps)
+    | ({
+        _key: string;
+      } & SectionDynamicList)
+    | ({
+        _key: string;
+      } & SectionLogos)
+    | ({
+        _key: string;
+      } & SectionQuote)
+    | ({
+        _key: string;
+      } & SectionCtaBand)
+    | ({
+        _key: string;
+      } & SectionForm)
+    | ({
+        _key: string;
+      } & SectionFaqList)
+    | ({
+        _key: string;
+      } & Embed)
+  >;
+};
+
 export type Embed = {
   _type: 'embed';
   title?: string;
@@ -1176,132 +1360,6 @@ export type Embed = {
   url?: string;
   html?: string;
   aspect?: string;
-};
-
-export type HomePageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'homePage';
-};
-
-export type AboutPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'aboutPage';
-};
-
-export type FaqPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'faqPage';
-};
-
-export type ContactPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'contactPage';
-};
-
-export type EventsPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'eventsPage';
-};
-
-export type SermonsPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'sermonsPage';
-};
-
-export type WorshipPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'worshipPage';
-};
-
-export type BeliefsPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'beliefsPage';
-};
-
-export type MusicPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'musicPage';
-};
-
-export type StaffPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'staffPage';
-};
-
-export type GrowPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'growPage';
-};
-
-export type ServePageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'servePage';
-};
-
-export type KidsPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'kidsPage';
-};
-
-export type FoodPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'foodPage';
-};
-
-export type UseOurSpacePageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'useOurSpacePage';
-};
-
-export type WeddingsPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'weddingsPage';
-};
-
-export type GivePageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'givePage';
-};
-
-export type PageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'page';
 };
 
 export type CtaBlock = {
@@ -1415,6 +1473,7 @@ export type Page = {
     alt?: string;
     _type: 'image';
   };
+  publishAt?: string;
 };
 
 export type GivePage = {
@@ -1499,6 +1558,7 @@ export type GivePage = {
       } & Embed)
   >;
   finalCta?: CtaBlock;
+  publishAt?: string;
   onlineHeadline?: string;
   onlineBodyP1?: string;
   waysHeadline?: string;
@@ -1600,6 +1660,7 @@ export type WeddingsPage = {
       } & Embed)
   >;
   finalCta?: CtaBlock;
+  publishAt?: string;
   inquiryForm?: FormReference;
   faqEyebrow?: string;
   faqHeadline?: string;
@@ -1708,6 +1769,7 @@ export type UseOurSpacePage = {
       } & Embed)
   >;
   finalCta?: CtaBlock;
+  publishAt?: string;
   inquiryForm?: FormReference;
   introEyebrow?: string;
   introHeadline?: string;
@@ -1803,6 +1865,7 @@ export type FoodPage = {
       } & Embed)
   >;
   finalCta?: CtaBlock;
+  publishAt?: string;
   lunchBagHeadline?: string;
   lunchBagSchedule?: string;
   lunchBagBodyP1?: string;
@@ -1898,6 +1961,7 @@ export type KidsPage = {
       } & Embed)
   >;
   finalCta?: CtaBlock;
+  publishAt?: string;
   worshipEyebrow?: string;
   worshipHeadline?: string;
   worshipBodyP1?: string;
@@ -1990,6 +2054,7 @@ export type ServePage = {
       } & Embed)
   >;
   finalCta?: CtaBlock;
+  publishAt?: string;
   ways?: Array<{
     name?: string;
     href?: string;
@@ -2085,6 +2150,7 @@ export type GrowPage = {
       } & Embed)
   >;
   finalCta?: CtaBlock;
+  publishAt?: string;
   groups?: Array<{
     name?: string;
     when?: string;
@@ -2180,6 +2246,7 @@ export type StaffPage = {
       } & Embed)
   >;
   finalCta?: CtaBlock;
+  publishAt?: string;
   finalCtaEyebrow?: string;
   finalCtaHeadline?: string;
   finalCtaSubhead?: string;
@@ -2267,6 +2334,7 @@ export type MusicPage = {
       } & Embed)
   >;
   finalCta?: CtaBlock;
+  publishAt?: string;
   introHeading?: string;
   introBodyP1?: string;
   choirEyebrow?: string;
@@ -2374,6 +2442,7 @@ export type BeliefsPage = {
       } & Embed)
   >;
   finalCta?: CtaBlock;
+  publishAt?: string;
   scriptureQuote?: string;
   scriptureCitation?: string;
   beliefsQ1?: string;
@@ -2495,6 +2564,7 @@ export type WorshipPage = {
       } & Embed)
   >;
   finalCta?: CtaBlock;
+  publishAt?: string;
   gatherEyebrow?: string;
   serviceBodyP1?: string;
   serviceBodyP2?: string;
@@ -3426,9 +3496,28 @@ export type AllSanitySchemaTypes =
   | StaffMember
   | FaqCategoryReference
   | FaqItem
-  | PrivacyPage
   | NotFoundPage
   | SiteSettings
+  | HomePageReference
+  | AboutPageReference
+  | FaqPageReference
+  | ContactPageReference
+  | EventsPageReference
+  | SermonsPageReference
+  | PrivacyPageReference
+  | WorshipPageReference
+  | BeliefsPageReference
+  | MusicPageReference
+  | StaffPageReference
+  | GrowPageReference
+  | ServePageReference
+  | KidsPageReference
+  | FoodPageReference
+  | UseOurSpacePageReference
+  | WeddingsPageReference
+  | GivePageReference
+  | PageReference
+  | NavLink
   | SectionFaqList
   | FaqCategory
   | SectionArchShowcase
@@ -3447,25 +3536,8 @@ export type AllSanitySchemaTypes =
   | SectionCardGrid
   | SectionImageText
   | SectionRichText
+  | PrivacyPage
   | Embed
-  | HomePageReference
-  | AboutPageReference
-  | FaqPageReference
-  | ContactPageReference
-  | EventsPageReference
-  | SermonsPageReference
-  | WorshipPageReference
-  | BeliefsPageReference
-  | MusicPageReference
-  | StaffPageReference
-  | GrowPageReference
-  | ServePageReference
-  | KidsPageReference
-  | FoodPageReference
-  | UseOurSpacePageReference
-  | WeddingsPageReference
-  | GivePageReference
-  | PageReference
   | CtaBlock
   | Page
   | GivePage
