@@ -704,6 +704,103 @@ export const guides: Guide[] = [
 
   // -------------------------------------------------------------------------
   {
+    slug: 'saved-sections',
+    title: 'Save a section and use it again',
+    icon: CopyIcon,
+    lead: 'Build a section once, keep it, and drop a copy of it on any other page.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'You spend twenty minutes getting a **Join us Sunday** band exactly right, and then you want the same band on four more pages. You do not have to build it again. Keep it as a **saved section** and add a copy wherever you need one.',
+      },
+      { kind: 'h', text: 'Keep a section you have built' },
+      { kind: 'path', items: ['Open the page', 'Publish menu', 'Save a section as preset'] },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page that already has the section you like.',
+          'Click the small arrow next to the **Publish** button, then **Save a section as preset**.',
+          'Pick the section from the list. The words inside it are shown so you can tell two of a kind apart.',
+          'Give it a name you will recognise later, then click **Save section**.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'positive',
+        title: 'Nothing on the site changes',
+        text: 'Saving a section only makes a copy for your own use. The page you saved it from is untouched, and no visitor sees anything new.',
+      },
+      { kind: 'h', text: 'Put it on another page' },
+      { kind: 'path', items: ['Pages', 'Saved sections', 'Publish menu', 'Add to a page'] },
+      {
+        kind: 'steps',
+        items: [
+          'Go to **Pages**, then **Saved sections**, and open the one you want.',
+          'Click the small arrow next to **Publish**, then **Add to a page**.',
+          'Pick the page. A copy is added to the bottom of that page as a draft.',
+          'Open that page, drag the section where you want it, and **Publish**.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'A copy, not a link',
+        text: "Once a saved section is on a page it is that page's own. Changing the saved section later does not change the pages that already have it, and editing one of those pages does not change the saved section.",
+      },
+      { kind: 'h', text: 'Tidying up' },
+      {
+        kind: 'p',
+        text: 'Delete a saved section you no longer use. Nothing on the website depends on it, so deleting one never breaks a page.',
+      },
+      { kind: 'seealso', items: ['Add & arrange sections', 'Copy a page, or put one away'] },
+    ],
+  },
+
+  // -------------------------------------------------------------------------
+  {
+    slug: 'check-a-page',
+    title: 'Check a page before you publish',
+    icon: SearchIcon,
+    lead: 'A quick second pair of eyes: missing photo descriptions, empty sections, and links that may go nowhere.',
+    diy: 'self',
+    body: [
+      { kind: 'path', items: ['Open the page', 'Publish menu', 'Check this page'] },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page you are about to publish.',
+          'Click the small arrow next to the **Publish** button, then **Check this page**.',
+          'Read what it found, fix anything you agree with, and publish when you are happy.',
+        ],
+      },
+      { kind: 'h', text: 'The three things it looks for' },
+      {
+        kind: 'bullets',
+        items: [
+          '**Photos without a description.** Alt text is the sentence a screen reader says out loud, and what shows if the photo does not load.',
+          '**Sections with nothing in them.** A section you added and never filled in shows up blank on the page.',
+          '**Links worth a look.** A link to our own site whose address no page seems to own.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'positive',
+        title: 'It never stops you publishing',
+        text: 'This is a courtesy read-through, not a rule. Everything it lists is a suggestion, and you can publish with the list on screen.',
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'It can be wrong',
+        text: 'Some photos are decoration and genuinely need no description. A link it questions may be perfectly fine. It also skips sections that fill themselves from a list (an FAQ list, a dynamic list, a form), because their words live elsewhere, so it will never tell you one of those is empty.',
+      },
+      { kind: 'seealso', items: ['Photos & images', 'Add & arrange sections'] },
+    ],
+  },
+
+  // -------------------------------------------------------------------------
+  {
     slug: 'build-a-form',
     title: 'Build your own form',
     icon: CommentIcon,

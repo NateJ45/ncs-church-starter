@@ -18,6 +18,7 @@ import type { StructureBuilder, StructureResolverContext } from 'sanity/structur
 import GuideView from './components/GuideView';
 import { guides } from './guides/content';
 import {
+  BlockElementIcon,
   CogIcon,
   HomeIcon,
   UserIcon,
@@ -76,6 +77,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'announcement',
   'worshipResource',
   'page',
+  'sectionPreset', // saved sections, placed explicitly under "Pages"
   'redirect', // placed explicitly under "Pages" -> Redirects
   // sanity-plugin-media registers this tag type; keep it out of the desk root
   // (the "Media" tool in the top sidebar is where tags belong).
@@ -184,6 +186,17 @@ export const deskStructure = (S: StructureBuilder, _context: StructureResolverCo
 
               // Custom pages (collection): build new pages at /<slug> with blocks.
               S.documentTypeListItem('page').title('Custom Pages').icon(DocumentTextIcon),
+
+              S.divider(),
+
+              // Saved sections: one band of a page, kept for reuse. Made from a
+              // page's publish menu ("Save a section as preset..."), put on
+              // another page from the saved section's own publish menu ("Add to
+              // a page..."). Ordered by name, because the name is the only way
+              // you find one again.
+              S.documentTypeListItem('sectionPreset')
+                .title('Saved sections')
+                .icon(BlockElementIcon),
 
               S.divider(),
 

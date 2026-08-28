@@ -26,6 +26,7 @@ import { notFoundPage } from './notFoundPage';
 import { page } from './page';
 import { privacyPage } from './privacyPage';
 import { redirect } from './redirect';
+import { sectionPreset } from './sectionPreset';
 import { sermon } from './sermon';
 import { sermonsPage } from './sermonsPage';
 import { siteSettings } from './siteSettings';
@@ -73,6 +74,10 @@ export const schemaTypes = [
 
   // Generic page (build new pages at /<slug> with the block library)
   page,
+
+  // One saved section, kept for reuse on other pages. Not content: nothing
+  // about a preset reaches the live site until it is added to a page.
+  sectionPreset,
 
   // Old address -> new address forwards, filed by hand or automatically when a
   // page's web address changes (see components/slugRedirect.tsx).
