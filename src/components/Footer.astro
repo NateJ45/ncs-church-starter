@@ -20,7 +20,7 @@
 // Tailwind v4 gotcha: max-w-xs/s/m/l are shadowed by this project's custom
 // --spacing-* tokens. Use max-w-md / max-w-2xl / arbitrary values for text widths.
 
-import { resolveSiteSettings } from '@/lib/siteSettings';
+import { resolveSiteSettings, type RawSiteSettings } from '@/lib/siteSettings';
 import { site } from '@/data/site';
 import { IconBrandInstagram, IconBrandFacebook, IconBrandYoutube } from '@tabler/icons-react';
 import { Phone, MapPin, Mail, Clock } from 'lucide-react';
@@ -40,32 +40,13 @@ interface NewsletterConfig {
 }
 
 interface Props {
-  siteSettings?: {
-    title?: string;
-    email?: string;
-    phone?: string;
-    addressLine?: string;
-    cityStateZip?: string;
-    socialInstagram?: string;
-    socialFacebook?: string;
-    socialYoutube?: string;
-    tagline?: string;
-    mission?: string;
-    worshipService?: { time?: string; day?: string; startTime24?: string; endTime24?: string } | null;
-    giveUrl?: string;
-    appUrl?: string;
-    directoryUrl?: string;
-    prayerUrl?: string;
-    footerCredit?: string;
-    footerCreditUrl?: string;
-    newsletter?: NewsletterConfig | null;
-    // Editor-managed footer link columns (Site Settings -> Navigation). When
-    // empty, the built-in columns below render.
-    footerColumns?: Array<{
-      title?: string;
-      links?: Array<{ label?: string; href?: string }>;
-    }> | null;
-  } | null;
+  siteSettings?:
+    | (RawSiteSettings & {
+        footerCredit?: string;
+        footerCreditUrl?: string;
+        newsletter?: NewsletterConfig | null;
+      })
+    | null;
 }
 
 const { siteSettings } = Astro.props as Props;
@@ -79,9 +60,12 @@ const brandName = settings.brandName;
 const email = settings.email;
 const phone = settings.phone;
 const officeHours = settings.officeHours; // undefined when unset -> line hides
-const ig = settings.social.instagram;
-const fb = settings.social.facebook;
-const yt = settings.social.youtube;
+// The footer's own "show social buttons" switch (Site Settings -> Navigation).
+// Unset means yes, so an untouched site is unchanged.
+const showSocials = settings.showFooterSocials;
+const ig = showSocials ? settings.social.instagram : undefined;
+const fb = showSocials ? settings.social.facebook : undefined;
+const yt = showSocials ? settings.social.youtube : undefined;
 const tagline = settings.tagline;
 const mission = settings.mission;
 const serviceTimes = serviceTime(settings.worshipService).line;
@@ -95,68 +79,19 @@ const currentYear = new Date().getFullYear();
 const siteCredit = siteSettings?.footerCredit;
 const siteCreditUrl = siteSettings?.footerCreditUrl;
 
-// STRUCTURE: footer navigation, grouped to mirror the header IA.
-const VISIT_LINKS = [
-  { label: 'Plan a Visit', href: '/worship' },
-  { label: 'Watch Sermons', href: '/sermons' },
-  { label: 'What We Believe', href: '/what-we-believe' },
-  { label: 'Music', href: '/music' },
-  { label: 'Events', href: '/events' },
-];
-const INVOLVED_LINKS = [
-  { label: 'Grow', href: '/grow' },
-  { label: 'Serve', href: '/serve' },
-  { label: 'Kids', href: '/kids' },
-  { label: 'Food Ministry', href: '/food' },
-];
-const CONNECT_LINKS = [
-  { label: 'Pastors & Staff', href: '/pastor-staff' },
-  { label: 'Use Our Space', href: '/use-our-space' },
-  { label: 'Weddings', href: '/weddings' },
-  { label: 'Contact', href: '/contact' },
-  { label: 'Give', href: '/give' },
-];
+// STRUCTURE: footer navigation. Editors set the columns and the small-print row
+// in Site Settings -> Navigation; the mapping and the built-in defaults (grouped
+// to mirror the header IA, with the optional app/directory/prayer integrations
+// appended to Connect) live in src/lib/siteSettings.ts, so the footer and the
+// header read the same source. The separate "Get in touch" column (contact +
+// social) always renders and is not configured there. External links open in a
+// new tab.
+const FOOTER_COLUMNS = settings.footerColumns;
 
-// Optional external integrations (church app, member directory, prayer card).
-// Appended to the Connect column only when set in siteSettings, so the template
-// can point at Subsplash / Planning Center / etc. without code, and nothing
-// extra shows for a church that doesn't use them.
-const connectLinks = [
-  ...CONNECT_LINKS,
-  ...(siteSettings?.appUrl ? [{ label: 'Church App', href: siteSettings.appUrl, external: true }] : []),
-  ...(siteSettings?.directoryUrl ? [{ label: 'Member Directory', href: siteSettings.directoryUrl, external: true }] : []),
-  ...(siteSettings?.prayerUrl ? [{ label: 'Prayer Request', href: siteSettings.prayerUrl, external: true }] : []),
-];
-
-// Footer link columns. Editors can override these in Site Settings -> Navigation
-// (Footer link columns). When unset, the built-in columns render, with the
-// optional app/directory/prayer integrations appended to Connect. The separate
-// "Get in touch" column (contact + social) always renders and is not configured
-// here. External links open in a new tab.
-type FooterColumn = { title: string; links: { label: string; href: string; external?: boolean }[] };
-
-const FALLBACK_FOOTER_COLUMNS: FooterColumn[] = [
-  { title: 'Visit', links: VISIT_LINKS },
-  { title: 'Get Involved', links: INVOLVED_LINKS },
-  { title: 'Connect', links: connectLinks },
-];
-
-function footerColumnsFromSettings(
-  cols?: Array<{ title?: string; links?: Array<{ label?: string; href?: string }> }> | null,
-): FooterColumn[] | null {
-  if (!Array.isArray(cols) || cols.length === 0) return null;
-  const mapped: FooterColumn[] = [];
-  for (const c of cols) {
-    const links = (Array.isArray(c?.links) ? c.links : [])
-      .filter((l) => l?.label && l?.href)
-      .map((l) => ({ label: l.label as string, href: l.href as string }));
-    if (c?.title && links.length > 0) mapped.push({ title: c.title, links });
-  }
-  return mapped.length > 0 ? mapped : null;
-}
-
-const FOOTER_COLUMNS: FooterColumn[] =
-  footerColumnsFromSettings(siteSettings?.footerColumns) ?? FALLBACK_FOOTER_COLUMNS;
+// The small-print row at the very bottom. EMPTY means "keep the built-in pair"
+// (Give + Privacy policy), which is rendered as its own markup below because
+// the two links carry different link styles.
+const LEGAL_LINKS = settings.legalNav;
 
 // Shared link class for the footer columns (cream on green, animated underline).
 const footerLink =
@@ -305,8 +240,16 @@ const footerLink =
     <div class="mx-auto max-w-content px-m py-m flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-xs text-xs text-chapel-foreground/70 text-center">
       <p>© {currentYear} {brandName}</p>
       <div class="flex items-center gap-m">
-        <a href={giveHref} class="link-underline hover:text-white transition-colors">Give</a>
-        <a href="/privacy" class="underline underline-offset-2 hover:text-white transition-colors">Privacy policy</a>
+        {LEGAL_LINKS.length > 0 ? (
+          LEGAL_LINKS.map((l) => (
+            <a href={l.href} class="link-underline hover:text-white transition-colors">{l.label}</a>
+          ))
+        ) : (
+          <>
+            <a href={giveHref} class="link-underline hover:text-white transition-colors">Give</a>
+            <a href="/privacy" class="underline underline-offset-2 hover:text-white transition-colors">Privacy policy</a>
+          </>
+        )}
         {siteCredit && (
           siteCreditUrl ? (
             <a href={siteCreditUrl} target="_blank" rel="noopener noreferrer" class="underline underline-offset-2 hover:text-white transition-colors">{siteCredit}</a>

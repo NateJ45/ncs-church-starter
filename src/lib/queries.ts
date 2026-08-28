@@ -57,6 +57,16 @@ export const SECTION_MEMBERS = `{
   }
 }`;
 
+// One menu link (schemaTypes/navLink.ts), as every menu needs it: the label,
+// the hand-typed address that older items still carry, and the picked page
+// DEREFERENCED down to a type + slug. src/lib/nav-href.ts turns that into an
+// href. The field list is separate from the braces so it can also be spread
+// into a projection that adds children (navItems' dropdown groups).
+const NAV_LINK_FIELDS = `_key, _type, label, linkType, href, externalUrl,
+    "slug": internalPage->slug.current,
+    "docType": internalPage->_type`;
+export const NAV_LINK_PROJECTION = `{ ${NAV_LINK_FIELDS} }`;
+
 // ---- Site settings (used in BaseLayout / Header / Footer) -----------------
 
 // Module-level memoized promise. The first call in a given build process fires
@@ -65,9 +75,10 @@ export const SECTION_MEMBERS = `{
 // collapsing N per-page calls into a single network request.
 let _siteSettingsPromise: Promise<any> | null = null;
 
-export async function getSiteSettings() {
-  if (_siteSettingsPromise) return _siteSettingsPromise;
-  _siteSettingsPromise = sanityFetch(`*[_type == "siteSettings"][0]{
+// Exported so the preview shell (src/layouts/PreviewLayout.astro) fetches the
+// chrome through the SAME projection. It used to fetch the raw document, which
+// left every dereferenced menu link null in the preview.
+export const SITE_SETTINGS_PROJECTION = `{
     title,
     tagline,
     mission,
@@ -76,6 +87,7 @@ export async function getSiteSettings() {
     phone,
     officeHours,
     favicon${IMAGE_PROJECTION},
+    logo${IMAGE_PROJECTION},
     addressLine,
     cityStateZip,
     geoLat,
@@ -95,18 +107,28 @@ export async function getSiteSettings() {
     footerCreditUrl,
     newsletter,
     navItems[]{
-      _type,
-      _key,
-      label,
-      href,
-      links[]{ _type, _key, label, href }
+      ${NAV_LINK_FIELDS},
+      links[]${NAV_LINK_PROJECTION}
     },
     footerColumns[]{
       _key,
       title,
-      links[]{ _key, label, href }
-    }
-  }`, {}, null);
+      links[]${NAV_LINK_PROJECTION}
+    },
+    legalNav[]${NAV_LINK_PROJECTION},
+    headerCta{ show, label, link${NAV_LINK_PROJECTION} },
+    showEmail,
+    showSocials,
+    showFooterSocials
+  }`;
+
+export async function getSiteSettings() {
+  if (_siteSettingsPromise) return _siteSettingsPromise;
+  _siteSettingsPromise = sanityFetch(
+    `*[_type == "siteSettings"][0]${SITE_SETTINGS_PROJECTION}`,
+    {},
+    null,
+  );
   return _siteSettingsPromise;
 }
 
@@ -149,12 +171,16 @@ export async function getPageHero(type: string) {
   // Spread (...) so any body-copy fields added to a page singleton (via the
   // definePageSingleton factory's extra fields) flow through automatically,
   // without listing each here. Images + flexibleSections are resolved explicitly.
-  return sanityFetch(`*[_type == $type][0]{
+  return sanityFetch(
+    `*[_type == $type][0]{
     ...,
     heroImage${IMAGE_PROJECTION},
     seoImage${IMAGE_PROJECTION},
     flexibleSections[]${SECTION_MEMBERS}
-  }`, { type }, null);
+  }`,
+    { type },
+    null,
+  );
 }
 
 // Dedicated spread getters for the pages that carry their own editable list
@@ -165,30 +191,42 @@ export async function getPageHero(type: string) {
 // these named helpers keep the page-to-getter mapping obvious for maintainers.
 
 export async function getGrowPage() {
-  return sanityFetch(`*[_type == "growPage"][0]{
+  return sanityFetch(
+    `*[_type == "growPage"][0]{
     ...,
     heroImage${IMAGE_PROJECTION},
     seoImage${IMAGE_PROJECTION},
     flexibleSections[]${SECTION_MEMBERS}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 export async function getServePage() {
-  return sanityFetch(`*[_type == "servePage"][0]{
+  return sanityFetch(
+    `*[_type == "servePage"][0]{
     ...,
     heroImage${IMAGE_PROJECTION},
     seoImage${IMAGE_PROJECTION},
     flexibleSections[]${SECTION_MEMBERS}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 export async function getBeliefsPage() {
-  return sanityFetch(`*[_type == "beliefsPage"][0]{
+  return sanityFetch(
+    `*[_type == "beliefsPage"][0]{
     ...,
     heroImage${IMAGE_PROJECTION},
     seoImage${IMAGE_PROJECTION},
     flexibleSections[]${SECTION_MEMBERS}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- Home page ------------------------------------------------------------
@@ -196,7 +234,8 @@ export async function getBeliefsPage() {
 // image (single or slideshow) is the editor-managed override.
 
 export async function getHomePage() {
-  return sanityFetch(`*[_type == "homePage"][0]{
+  return sanityFetch(
+    `*[_type == "homePage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -236,13 +275,17 @@ export async function getHomePage() {
     finalCta${CTA_PROJECTION},
     finalCtaBackgroundImage${IMAGE_PROJECTION},
     flexibleSections[]${SECTION_MEMBERS}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- About page -----------------------------------------------------------
 
 export async function getAboutPage() {
-  return sanityFetch(`*[_type == "aboutPage"][0]{
+  return sanityFetch(
+    `*[_type == "aboutPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -261,13 +304,17 @@ export async function getAboutPage() {
     finalCtaBackgroundImage${IMAGE_PROJECTION},
     finalCta${CTA_PROJECTION},
     flexibleSections[]${SECTION_MEMBERS}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- FAQ page -------------------------------------------------------------
 
 export async function getFaqPage() {
-  return sanityFetch(`*[_type == "faqPage"][0]{
+  return sanityFetch(
+    `*[_type == "faqPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -288,7 +335,10 @@ export async function getFaqPage() {
     finalCta${CTA_PROJECTION},
     secondaryCta${CTA_PROJECTION},
     flexibleSections[]${SECTION_MEMBERS}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- FAQ items (for sectionFaqList page-builder block) -------------------
@@ -327,51 +377,71 @@ export async function getFaqItems(opts: { category?: string; limit?: number } = 
 // ---- Contact page ---------------------------------------------------------
 
 export async function getContactPage() {
-  return sanityFetch(`*[_type == "contactPage"][0]{
+  return sanityFetch(
+    `*[_type == "contactPage"][0]{
     ...,
     seoImage${IMAGE_PROJECTION},
     heroImage${IMAGE_PROJECTION},
     contactForm->${FORM_PROJECTION},
     flexibleSections[]${SECTION_MEMBERS}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- Weddings + Use Our Space pages (hero + dereferenced inquiry form) -----
 
 export async function getWeddingsPage() {
-  return sanityFetch(`*[_type == "weddingsPage"][0]{
+  return sanityFetch(
+    `*[_type == "weddingsPage"][0]{
     ...,
     heroImage${IMAGE_PROJECTION},
     seoImage${IMAGE_PROJECTION},
     inquiryForm->${FORM_PROJECTION},
     flexibleSections[]${SECTION_MEMBERS}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 export async function getUseOurSpacePage() {
-  return sanityFetch(`*[_type == "useOurSpacePage"][0]{
+  return sanityFetch(
+    `*[_type == "useOurSpacePage"][0]{
     ...,
     heroImage${IMAGE_PROJECTION},
     seoImage${IMAGE_PROJECTION},
     inquiryForm->${FORM_PROJECTION},
     flexibleSections[]${SECTION_MEMBERS}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // Standalone form fetch by slug (page-builder formRef block, ad-hoc embeds).
 export async function getForm(slug: string) {
-  return sanityFetch(`*[_type == "form" && slug.current == $slug][0]${FORM_PROJECTION}`, { slug }, null);
+  return sanityFetch(
+    `*[_type == "form" && slug.current == $slug][0]${FORM_PROJECTION}`,
+    { slug },
+    null,
+  );
 }
 
 // ---- Generic custom pages (/[slug], page-builder blocks) ------------------
 export async function getPageBySlug(slug: string) {
-  return sanityFetch(`*[_type == "page" && slug.current == $slug][0]{
+  return sanityFetch(
+    `*[_type == "page" && slug.current == $slug][0]{
     title, "slug": slug.current,
     heroEyebrow, heroHeadline, heroSubhead,
     heroImage${IMAGE_PROJECTION},
     seoTitle, seoDescription, seoImage${IMAGE_PROJECTION},
     sections[]${SECTION_MEMBERS}
-  }`, { slug }, null);
+  }`,
+    { slug },
+    null,
+  );
 }
 
 export async function getAllPageSlugs(): Promise<string[]> {
@@ -386,7 +456,8 @@ export async function getAllPageSlugs(): Promise<string[]> {
 // ---- 404 page -------------------------------------------------------------
 
 export async function getNotFoundPage() {
-  return sanityFetch(`*[_type == "notFoundPage"][0]{
+  return sanityFetch(
+    `*[_type == "notFoundPage"][0]{
     seoTitle,
     seoDescription,
     eyebrow,
@@ -396,13 +467,17 @@ export async function getNotFoundPage() {
     primaryCtaLabel, primaryCtaHref,
     secondaryCtaLabel, secondaryCtaHref,
     tertiaryCtaLabel, tertiaryCtaHref
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- Privacy page ---------------------------------------------------------
 
 export async function getPrivacyPage() {
-  return sanityFetch(`*[_type == "privacyPage"][0]{
+  return sanityFetch(
+    `*[_type == "privacyPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -412,18 +487,25 @@ export async function getPrivacyPage() {
     lastUpdated,
     body,
     flexibleSections[]${SECTION_MEMBERS}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- Pastors & staff collection -------------------------------------------
 
 export async function getStaffMembers() {
-  return sanityFetch(`*[_type == "staffMember"] | order(displayOrder asc, name asc){
+  return sanityFetch(
+    `*[_type == "staffMember"] | order(displayOrder asc, name asc){
     _id, name, role, email,
     photo${IMAGE_PROJECTION},
     bio,
     favorites[]{ label, value }
-  }`, {}, []);
+  }`,
+    {},
+    [],
+  );
 }
 
 // ---- Ministries collection ------------------------------------------------
@@ -464,12 +546,16 @@ const EVENT_CARD = `{
 }`;
 
 export async function getEventsPage() {
-  return sanityFetch(`*[_type == "eventsPage"][0]{
+  return sanityFetch(
+    `*[_type == "eventsPage"][0]{
     ...,
     seoImage${IMAGE_PROJECTION},
     heroImage${IMAGE_PROJECTION},
     flexibleSections[]${SECTION_MEMBERS}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // Recurring rhythms (weekly worship, Bible study) — always shown, ordered by
@@ -550,12 +636,16 @@ const SERMON_CARD = `{
 }`;
 
 export async function getSermonsPage() {
-  return sanityFetch(`*[_type == "sermonsPage"][0]{
+  return sanityFetch(
+    `*[_type == "sermonsPage"][0]{
     ...,
     seoImage${IMAGE_PROJECTION},
     heroImage${IMAGE_PROJECTION},
     flexibleSections[]${SECTION_MEMBERS}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 export async function getRecentSermons() {

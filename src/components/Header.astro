@@ -14,42 +14,26 @@
 // siteSettings is optional. Defaults render cleanly so the header works
 // even before Sanity content is wired up.
 
-import { resolveSiteSettings } from '@/lib/siteSettings';
+import { resolveSiteSettings, type RawSiteSettings } from '@/lib/siteSettings';
 import { site } from '@/data/site';
 import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
 import { ChevronDown } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import MobileNav from './MobileNav';
 import { serviceTime } from '@/lib/serviceTime';
+import { urlFor } from '@/lib/sanity';
 
-// The church brand is a text wordmark (Instrument Serif), not an image logo,
-// so there are no logo assets to pipe through getImage here.
+// The church brand is a text wordmark (Instrument Serif) by default, so there
+// is nothing to pipe through getImage. An uploaded siteSettings.logo replaces
+// it and goes through Sanity's CDN like every other Sanity image.
+//
+// The URL is built here with urlFor() rather than through <SanityImage>: the
+// header renders on EVERY page, so importing that component would pull its
+// module into the always-loaded chunk and rename the shared CSS bundle for the
+// whole site. One <img> with a two-density srcset is all a logo needs.
 
 interface Props {
-  siteSettings?: {
-    siteName?: string;
-    title?: string;
-    tagline?: string;
-    email?: string;
-    phone?: string;
-    addressLine?: string;
-    socialInstagram?: string;
-    socialFacebook?: string;
-    // Church utility-bar content. All optional with real fallbacks below, so
-    // the bar is never empty before Sanity is wired.
-    worshipService?: { time?: string; day?: string; startTime24?: string; endTime24?: string } | null; // single source for the service time
-    giveUrl?: string;        // giving portal; falls back to the /give page
-    watchUrl?: string;       // livestream; falls back to the /sermons page
-    // Editor-managed top menu (Site Settings -> Navigation). Each entry is a
-    // navLink {label, href} or a navGroup {label, links:[{label, href}]}.
-    // When absent/empty, the built-in FALLBACK_NAV_ITEMS below renders.
-    navItems?: Array<{
-      _type?: string;
-      label?: string;
-      href?: string;
-      links?: Array<{ label?: string; href?: string }>;
-    }> | null;
-  } | null;
+  siteSettings?: (RawSiteSettings & { siteName?: string }) | null;
 }
 
 const { siteSettings } = Astro.props as Props;
@@ -69,18 +53,40 @@ const addressShort = settings.addressLine; // "123 Main Street"
 const giveHref = settings.giveHref;
 const watchHref = settings.watchHref;
 
-const ig = settings.social.instagram;
-const fb = settings.social.facebook;
+// Utility toggles (Site Settings -> Navigation). Both read "unset means yes",
+// so an untouched site is unchanged. Turning one off is expressed by handing
+// the markup an empty value rather than a new flag, which keeps the existing
+// `{ig && ...}` guards as the single place that decides.
+const ig = settings.showSocials ? settings.social.instagram : undefined;
+const fb = settings.showSocials ? settings.social.facebook : undefined;
+
+// The header's one button, and the logo that may stand in for the wordmark.
+// The logo box is 48px tall at most (h-12), so 240w covers a 5:1 wordmark at
+// 1x and 480w covers it at 2x.
+const headerCta = settings.headerCta;
+const logo = settings.logo;
+const logoSrc = logo ? urlFor(logo).width(240).quality(80).auto('format').url() : undefined;
+const logoSrcset = logo
+  ? [240, 480].map((w) => `${urlFor(logo).width(w).quality(80).auto('format').url()} ${w}w`).join(', ')
+  : undefined;
 
 // Subset of siteSettings the mobile menu needs. Pass as a plain object so the
 // React island doesn't try to serialize the whole Sanity document graph.
 const mobileNavSettings = {
   tagline: settings.tagline,
-  email: settings.email,
+  email: settings.showEmail ? settings.email : '',
   phone: settings.phone,
   socialInstagram: ig,
   socialFacebook: fb,
 };
+
+// The drawer's CTA prop is only passed when it DIFFERS from the drawer's own
+// built-in button. An island's props are serialized into the page, so passing
+// the default every time would rewrite the markup of every page for no change.
+const mobileCtaProps =
+  headerCta.show && headerCta.label === 'Plan a Visit' && headerCta.href === '/worship'
+    ? {}
+    : { cta: headerCta };
 
 // Core nav structure. Flat items render as plain anchor links; dropdown
 // items render as native <details>/<summary> disclosure groups on desktop
@@ -99,72 +105,11 @@ const mobileNavSettings = {
 // CTA at the right of the nav row does that job, and the MobileNav drawer also
 // surfaces the CTA at the top.
 //
-// Core nav: /, /about, /services, /faq, /journal, /contact (CTA button).
-// Module routes (/portfolio, /process, /e-design, /shop, /gift-certificates,
-// /quiz, /calculator, /guides, /press, /resources) are opt-in via modules/
-// and are NOT linked from the core nav.
+// Core nav lives in Sanity (Site Settings -> Navigation). Both the mapping and
+// the built-in safety-net menu live in src/lib/siteSettings.ts, so the header,
+// the drawer, and the footer can never disagree about what the menu is.
 
-type NavItem =
-  | { kind: 'flat'; label: string; href: string }
-  | { kind: 'dropdown'; label: string; items: { label: string; href: string }[] };
-
-// Raw shape of an editor-managed nav entry coming from Sanity.
-type SettingsNavItem = {
-  _type?: string;
-  label?: string;
-  href?: string;
-  links?: Array<{ label?: string; href?: string }>;
-};
-
-// Built-in default menu. Used when Site Settings -> Navigation is empty, so the
-// header is never broken or bare and a fresh clone of the template still renders
-// a sensible menu before anyone touches Sanity.
-const FALLBACK_NAV_ITEMS: NavItem[] = [
-  { kind: 'flat', label: "I'm New", href: '/worship' },
-  { kind: 'dropdown', label: 'About Us', items: [
-    { label: 'What We Believe', href: '/what-we-believe' },
-    { label: 'Music', href: '/music' },
-    { label: 'Pastors & Staff', href: '/pastor-staff' },
-  ] },
-  { kind: 'dropdown', label: 'Get Involved', items: [
-    { label: 'Grow', href: '/grow' },
-    { label: 'Serve', href: '/serve' },
-    { label: 'Kids', href: '/kids' },
-    { label: 'Food Ministry', href: '/food' },
-  ] },
-  { kind: 'flat', label: 'Watch', href: '/sermons' },
-  { kind: 'flat', label: 'Events', href: '/events' },
-  { kind: 'dropdown', label: 'Space', items: [
-    { label: 'Use Our Space', href: '/use-our-space' },
-    { label: 'Weddings', href: '/weddings' },
-    { label: 'Friends of the Church', href: 'https://example.org' },
-  ] },
-  { kind: 'flat', label: 'Contact', href: '/contact' },
-];
-
-// Map the editor-managed nav (Site Settings -> Navigation) into the {kind} shape
-// the render + MobileNav already consume. navGroup -> dropdown, navLink -> flat.
-// Entries missing a label/href are dropped so a half-filled row can't break the
-// menu. Returns null when nothing usable is set, so we fall back to the default.
-function navFromSettings(items?: SettingsNavItem[] | null): NavItem[] | null {
-  if (!Array.isArray(items) || items.length === 0) return null;
-  const mapped: NavItem[] = [];
-  for (const it of items) {
-    if (it?._type === 'navGroup') {
-      const children = (Array.isArray(it.links) ? it.links : [])
-        .filter((l) => l?.label && l?.href)
-        .map((l) => ({ label: l.label as string, href: l.href as string }));
-      if (it.label && children.length > 0) {
-        mapped.push({ kind: 'dropdown', label: it.label, items: children });
-      }
-    } else if (it?.label && it?.href) {
-      mapped.push({ kind: 'flat', label: it.label, href: it.href });
-    }
-  }
-  return mapped.length > 0 ? mapped : null;
-}
-
-const NAV_ITEMS: NavItem[] = navFromSettings(siteSettings?.navItems) ?? FALLBACK_NAV_ITEMS;
+const NAV_ITEMS = settings.headerNav;
 
 // MobileNav consumes the same {kind} shape (NavLink[] with optional sub-items).
 const NAV_LINKS = NAV_ITEMS;
@@ -267,17 +212,33 @@ function isGroupActive(items: { href: string }[]) {
       eyebrow strip above — at viewports between md and lg the desktop
       layout would squish, so mobile-style header stays in use. */}
   <div class="relative mx-auto flex max-w-content items-center justify-center lg:justify-between px-l py-m border-b border-border">
-    {/* Text wordmark in the display serif. The church brand is typographic,
-        not an image logo, so it renders crisp at any density and needs no
-        theme-swap machinery (it inherits the theme-aware foreground color). */}
+    {/* Text wordmark in the display serif. The church brand is typographic by
+        default, so it renders crisp at any density and needs no theme-swap
+        machinery (it inherits the theme-aware foreground color). An uploaded
+        Site Settings logo takes its place, capped to the header's height so a
+        large upload can't stretch the row. */}
     <a
       href="/"
       class="inline-flex flex-col leading-none hover:opacity-80 transition-opacity"
       aria-label={`${brandName} home`}
     >
-      <span class="font-display text-xl sm:text-2xl text-foreground leading-none">{site.wordmark.line1}</span>
-      {site.wordmark.line2 && (
-        <span class="font-display text-base sm:text-lg text-foreground/70 leading-tight mt-0.5">{site.wordmark.line2}</span>
+      {logo ? (
+        <img
+          src={logoSrc}
+          srcset={logoSrcset}
+          sizes="240px"
+          alt={logo.alt || brandName}
+          loading="eager"
+          decoding="async"
+          class="h-10 sm:h-12 w-auto object-contain"
+        />
+      ) : (
+        <>
+          <span class="font-display text-xl sm:text-2xl text-foreground leading-none">{site.wordmark.line1}</span>
+          {site.wordmark.line2 && (
+            <span class="font-display text-base sm:text-lg text-foreground/70 leading-tight mt-0.5">{site.wordmark.line2}</span>
+          )}
+        </>
       )}
     </a>
 
@@ -357,23 +318,26 @@ function isGroupActive(items: { href: string }[]) {
         )}
       </nav>
       <span class="h-6 w-px bg-border-soft" aria-hidden="true"></span>
-      <a
-        href="/worship"
-        class:list={[
-          'press-tactile inline-flex items-center px-m py-2 rounded-full text-xs uppercase tracking-eyebrow font-semibold',
-          isActive('/worship')
-            ? 'bg-accent-dark text-white'
-            : 'bg-primary text-primary-foreground hover:bg-primary-dark',
-        ]}
-      >
-        Plan a Visit
-      </a>
+      {headerCta.show && (
+        <a
+          href={headerCta.href}
+          class:list={[
+            'press-tactile inline-flex items-center px-m py-2 rounded-full text-xs uppercase tracking-eyebrow font-semibold',
+            isActive(headerCta.href)
+              ? 'bg-accent-dark text-white'
+              : 'bg-primary text-primary-foreground hover:bg-primary-dark',
+          ]}
+        >
+          {headerCta.label}
+        </a>
+      )}
     </div>
 
     <MobileNav
       client:only="react"
       links={NAV_LINKS}
       siteSettings={mobileNavSettings}
+      {...mobileCtaProps}
     />
   </div>
 </header>

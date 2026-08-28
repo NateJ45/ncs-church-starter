@@ -22,13 +22,7 @@
 import { useState } from 'react';
 import { Menu, Mail, Phone, ChevronRight } from 'lucide-react';
 import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import ThemeToggle from './ThemeToggle';
 import { telHref } from '@/lib/phone';
 import { site } from '@/data/site';
@@ -60,16 +54,24 @@ interface MobileNavSiteSettings {
 interface Props {
   links: NavItem[];
   siteSettings?: MobileNavSiteSettings | null;
+  /**
+   * The drawer's primary button. Header.astro only passes this when the editor
+   * has changed it in Site Settings, so an untouched site serializes no extra
+   * island props.
+   */
+  cta?: { show: boolean; label: string; href: string };
 }
+
+/** Built-in drawer button, matching the header's own default. */
+const DEFAULT_CTA = { show: true, label: 'Plan a Visit', href: '/worship' };
 
 // ---- Component --------------------------------------------------------------
 
-export default function MobileNav({ links, siteSettings }: Props) {
+export default function MobileNav({ links, siteSettings, cta = DEFAULT_CTA }: Props) {
   const [open, setOpen] = useState(false);
 
   const tagline =
-    siteSettings?.tagline ??
-    'Serving and celebrating Jesus for the good of the world.';
+    siteSettings?.tagline ?? 'Serving and celebrating Jesus for the good of the world.';
   const email = siteSettings?.email;
   const phone = siteSettings?.phone;
   const ig = siteSettings?.socialInstagram;
@@ -101,15 +103,17 @@ export default function MobileNav({ links, siteSettings }: Props) {
           </SheetHeader>
 
           {/* Primary CTA — main conversion action surfaced before the nav list. */}
-          <div className="px-l pb-l">
-            <a
-              href="/worship"
-              onClick={close}
-              className="block w-full px-m py-m text-center rounded-full bg-primary text-primary-foreground text-xs uppercase tracking-eyebrow font-semibold hover:bg-primary-dark transition-colors"
-            >
-              Plan a Visit
-            </a>
-          </div>
+          {cta.show && (
+            <div className="px-l pb-l">
+              <a
+                href={cta.href}
+                onClick={close}
+                className="block w-full px-m py-m text-center rounded-full bg-primary text-primary-foreground text-xs uppercase tracking-eyebrow font-semibold hover:bg-primary-dark transition-colors"
+              >
+                {cta.label}
+              </a>
+            </div>
+          )}
 
           {/* Tagline in display serif for editorial feel. */}
           <p className="px-l pb-l font-display italic text-h4 text-foreground/85 leading-snug">
@@ -148,7 +152,11 @@ export default function MobileNav({ links, siteSettings }: Props) {
                       onClick={close}
                       className="flex items-center gap-xs pl-[calc(theme(spacing.l)+0.5rem)] pr-l py-xs text-base font-body text-foreground hover:bg-muted hover:text-link transition-colors"
                     >
-                      <ChevronRight size={12} className="shrink-0 text-foreground/40" aria-hidden="true" />
+                      <ChevronRight
+                        size={12}
+                        className="shrink-0 text-foreground/40"
+                        aria-hidden="true"
+                      />
                       {sub.label}
                     </a>
                   ))}
@@ -220,7 +228,9 @@ export default function MobileNav({ links, siteSettings }: Props) {
           <div className="border-t border-border-soft px-l py-l flex flex-col items-center text-center leading-none">
             <span className="font-display text-xl text-foreground">{site.wordmark.line1}</span>
             {site.wordmark.line2 ? (
-              <span className="font-display text-base text-foreground/70 mt-0.5">{site.wordmark.line2}</span>
+              <span className="font-display text-base text-foreground/70 mt-0.5">
+                {site.wordmark.line2}
+              </span>
             ) : null}
           </div>
         </SheetContent>

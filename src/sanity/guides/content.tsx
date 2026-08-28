@@ -39,7 +39,12 @@ export type GuideBlock =
   | { kind: 'steps'; items: string[] }
   | { kind: 'bullets'; items: string[] }
   | { kind: 'path'; items: string[] }
-  | { kind: 'callout'; tone?: 'primary' | 'positive' | 'caution' | 'default'; title?: string; text: string }
+  | {
+      kind: 'callout';
+      tone?: 'primary' | 'positive' | 'caution' | 'default';
+      title?: string;
+      text: string;
+    }
   | { kind: 'seealso'; items: string[] };
 
 export interface Guide {
@@ -101,7 +106,10 @@ export const guides: Guide[] = [
           '**Alt text**: a short sentence describing a photo, read aloud to blind visitors and read by Google.',
         ],
       },
-      { kind: 'seealso', items: ["Edit a page's words & photos", 'Do it yourself vs. call Nathan'] },
+      {
+        kind: 'seealso',
+        items: ["Edit a page's words & photos", 'Do it yourself vs. call Nathan'],
+      },
     ],
   },
 
@@ -217,7 +225,9 @@ export const guides: Guide[] = [
       { kind: 'h', text: 'Take it down' },
       {
         kind: 'steps',
-        items: ['Open the announcement, turn **Enabled** off (or set the **End** date to today), and Publish.'],
+        items: [
+          'Open the announcement, turn **Enabled** off (or set the **End** date to today), and Publish.',
+        ],
       },
       {
         kind: 'callout',
@@ -253,7 +263,10 @@ export const guides: Guide[] = [
       { kind: 'path', items: ['Pages', 'FAQ', 'Category order'] },
       {
         kind: 'steps',
-        items: ['Open **Pages**, then **FAQ**, and find **Category order**.', 'Drag the categories into the order you want. Publish.'],
+        items: [
+          'Open **Pages**, then **FAQ**, and find **Category order**.',
+          'Drag the categories into the order you want. Publish.',
+        ],
       },
       {
         kind: 'callout',
@@ -279,7 +292,10 @@ export const guides: Guide[] = [
       },
       {
         kind: 'steps',
-        items: ['Open **Pages**, then **Sermons (index page)**.', 'Check the watch / livestream link is correct. Publish.'],
+        items: [
+          'Open **Pages**, then **Sermons (index page)**.',
+          'Check the watch / livestream link is correct. Publish.',
+        ],
       },
       { kind: 'h', text: 'Post a recorded message' },
       { kind: 'path', items: ['Sermons', 'New sermon'] },
@@ -375,21 +391,28 @@ export const guides: Guide[] = [
     slug: 'top-menu',
     title: 'Edit the top menu & footer',
     icon: MenuIcon,
-    lead: 'Add, rename, reorder, or remove the links in the website header and footer, including dropdown menus.',
+    lead: 'Add, rename, reorder, or remove the links in the website header and footer, including dropdown menus, the header button, a logo, and the small print at the bottom.',
     diy: 'self',
     body: [
-      { kind: 'path', items: ['Site Settings', 'Navigation'] },
+      { kind: 'path', items: ['Site Settings', 'Navigation (menus)'] },
       { kind: 'h', text: 'Add or change a menu link' },
       {
         kind: 'steps',
         items: [
-          'Open **Site Settings** (top of the menu), then the **Navigation** tab.',
+          'Open **Site Settings** (top of the menu), then the **Navigation (menus)** tab.',
           'Under **Top menu links**, click **Add item**.',
           'Choose **Link** for a single page, or **Dropdown menu** to group several links under one label.',
-          'For a link, type the **Label** (what people see) and the **Address** (a page on this site like /worship, or a full web address).',
+          'For a link, type the **Label** (what people see), then choose where it goes: **A page on this site** lets you pick the page from a list, and **Another website** takes a full web address.',
           'Drag items by the dots to reorder them. Use the three dots on an item to remove it.',
+          'The header fits about **seven** links, so keep the list short.',
           'Click **Publish**. The header updates across the site.',
         ],
+      },
+      {
+        kind: 'callout',
+        tone: 'positive',
+        title: 'Picking the page is safer than typing the address',
+        text: 'When you pick a page from the list, the link follows that page. If its web address ever changes, the menu link changes with it and can never go dead. Older links here still show an **Address (typed by hand)** box, and that typed address is what the site uses. Clear it if you would rather pick the page.',
       },
       { kind: 'h', text: 'Build a dropdown menu' },
       {
@@ -410,17 +433,36 @@ export const guides: Guide[] = [
       {
         kind: 'steps',
         items: [
-          'In the same **Navigation** tab, scroll to **Footer link columns**.',
+          'In the same **Navigation (menus)** tab, scroll to **Footer link columns**.',
           'Click **Add item**, choose **Column**, and give it a **Column heading**, for example "Visit".',
-          'Add a **Link** for each item in that column. Add up to three columns.',
+          'Add a **Link** for each item in that column. Aim for three columns so the footer stays balanced; four is the most that fits.',
           'Publish. The "Get in touch" column (email, phone, social) is added for you automatically.',
         ],
+      },
+      { kind: 'h', text: 'The small print at the very bottom' },
+      {
+        kind: 'p',
+        text: 'The little links beside the copyright line (Give, Privacy policy) are **Footer small-print links**, in the same **Navigation (menus)** tab. Leave it empty to keep those two, or add your own to replace them.',
+      },
+      { kind: 'h', text: 'The button at the right of the header' },
+      {
+        kind: 'steps',
+        items: [
+          'In **Navigation (menus)**, open **Header button**.',
+          'Type **Button text** to change what it says, and set **Where the button goes** to change where it leads. Leave both blank for the built-in "Plan a Visit" pointing at the Worship page.',
+          'Turn **Show the header button** off to remove the button from the header and from the phone menu.',
+        ],
+      },
+      { kind: 'h', text: 'Use a logo instead of the typed name' },
+      {
+        kind: 'p',
+        text: 'In **Identity & contact**, upload a **Logo** and it takes the place of the typed wordmark at the top of every page. Add **Alt text** so screen readers can read it. Trim the spare space around the image before you upload, because the site scales the whole picture to the header height. Remove the logo and the typed wordmark comes back.',
       },
       {
         kind: 'callout',
         tone: 'primary',
         title: 'Empty means the built-in menus',
-        text: 'Both the top menu and the footer columns fall back to the built-in menus while they are empty, so you only change what you fill in.',
+        text: 'The top menu, the footer columns, the small-print links and the header button all fall back to the built-in ones while they are empty, so you only change what you fill in. The same goes for the three switches here (the email and social buttons in the phone menu, the social buttons in the footer): leave them alone and everything shows as it does today.',
       },
       { kind: 'seealso', items: ['Build a brand-new page'] },
     ],
@@ -473,7 +515,10 @@ export const guides: Guide[] = [
         ],
       },
       { kind: 'h', text: "Change a section's background" },
-      { kind: 'p', text: 'Each section has a **Background** control so it sits nicely on the page.' },
+      {
+        kind: 'p',
+        text: 'Each section has a **Background** control so it sits nicely on the page.',
+      },
       {
         kind: 'bullets',
         items: [
