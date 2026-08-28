@@ -35,7 +35,7 @@ import { resolve } from './src/sanity/resolve';
 import { envVal } from './src/sanity/urls';
 import StudioLogo from './src/sanity/components/StudioLogo';
 import StudioLayout from './src/sanity/components/StudioLayout';
-import { CharacterCountInput } from './src/sanity/components/CharacterCountInput';
+import { StudioFormInput } from './src/sanity/components/formInput';
 import { documentBadges } from './src/sanity/components/documentBadges';
 import { shareDraftLinkAction } from './src/sanity/components/shareDraftLink';
 import {
@@ -117,13 +117,15 @@ export default defineConfig({
     },
   },
 
-  // Global form customization. Registering the character-count input once here
-  // applies it to every capped text field across all schemas. The component
-  // falls through to the default input for anything that isn't a string/text
-  // field with a max length, so it's safe as a global wrapper.
+  // Global form customization. Sanity allows exactly ONE input wrapper for the
+  // whole Studio, and this template asks two things of it: the character counter
+  // under capped text fields, and the live-draft bridge that carries keystrokes
+  // to the Presentation preview. Both live in src/sanity/components/formInput.tsx
+  // and both fall through to the default input for everything else, so this stays
+  // safe as a global wrapper.
   form: {
     components: {
-      input: CharacterCountInput,
+      input: StudioFormInput,
     },
   },
 
