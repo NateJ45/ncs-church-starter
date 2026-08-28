@@ -226,6 +226,11 @@ export const sectionCtaBand = defineType({
   preview: { select: { title: 'headline' }, prepare: ({ title }) => ({ title: title || 'CTA band' }) },
 });
 
+// A Form section has two ways to ask a question, and it uses the simpler one
+// first. Write questions in "Your own questions" and the section builds the form
+// for you, always starting with the name, email, and phone boxes. Leave that
+// list empty and the section behaves exactly as before: it shows the Form
+// document you point it at. Shaping and caps: src/lib/custom-form-fields.ts.
 export const sectionForm = defineType({
   name: 'sectionForm',
   title: 'Form',
@@ -233,9 +238,44 @@ export const sectionForm = defineType({
   fields: [
     defineField({ name: 'heading', title: 'Heading', type: 'string' }),
     defineField({ name: 'intro', title: 'Intro', type: 'text', rows: 2 }),
-    defineField({ name: 'form', title: 'Form', type: 'reference', to: [{ type: 'form' }], validation: (R) => R.required() }),
+    defineField({
+      name: 'fields',
+      title: 'Your own questions',
+      type: 'array',
+      description:
+        'Write the questions you want to ask. The name, email, and phone boxes always come first, so you can always reply. Maximum 12 questions. Leave this empty to use a Form document instead.',
+      of: [defineArrayMember({ type: 'formQuestion' })],
+      validation: (R) => R.max(12),
+    }),
+    defineField({
+      name: 'form',
+      title: 'Form',
+      type: 'reference',
+      to: [{ type: 'form' }],
+      description: 'Only needed when you have not written your own questions above.',
+      hidden: ({ parent }) => Array.isArray(parent?.fields) && parent.fields.length > 0,
+      // Was plainly required. Now one of the two ways must be filled in, so a
+      // section built from questions alone is valid and one built the old way
+      // still cannot be left empty.
+      validation: (R) =>
+        R.custom((value, context) => {
+          const parent = context.parent as { fields?: unknown[] } | undefined;
+          const questions = Array.isArray(parent?.fields) ? parent.fields.length : 0;
+          if (questions > 0 || value) return true;
+          return 'Pick a Form, or write your own questions above.';
+        }),
+    }),
   ],
-  preview: { select: { title: 'heading', form: 'form.title' }, prepare: ({ title, form }) => ({ title: title || form || 'Form' }) },
+  preview: {
+    select: { title: 'heading', form: 'form.title', fields: 'fields' },
+    prepare: ({ title, form, fields }) => {
+      const count = Array.isArray(fields) ? fields.length : 0;
+      return {
+        title: title || form || 'Form',
+        subtitle: count > 0 ? `${count} question${count === 1 ? '' : 's'}` : undefined,
+      };
+    },
+  },
 });
 
 export const sectionFeatureCards = defineType({

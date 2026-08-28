@@ -1161,6 +1161,11 @@ export type SectionForm = {
   _type: 'sectionForm';
   heading?: string;
   intro?: string;
+  fields?: Array<
+    {
+      _key: string;
+    } & FormQuestion
+  >;
   form?: FormReference;
 };
 
@@ -1260,6 +1265,14 @@ export type SectionRichText = {
   }>;
   align?: 'left' | 'center';
   background?: Background;
+};
+
+export type FormQuestion = {
+  _type: 'formQuestion';
+  label?: string;
+  kind?: 'text' | 'email' | 'phone' | 'textarea' | 'select' | 'checkbox';
+  options?: Array<string>;
+  required?: boolean;
 };
 
 export type PrivacyPage = {
@@ -3552,6 +3565,7 @@ export type AllSanitySchemaTypes =
   | SectionCardGrid
   | SectionImageText
   | SectionRichText
+  | FormQuestion
   | PrivacyPage
   | Embed
   | CtaBlock

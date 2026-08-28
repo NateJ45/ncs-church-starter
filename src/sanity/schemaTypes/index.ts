@@ -18,6 +18,7 @@ import { faqCategory } from './faqCategory';
 import { faqItem } from './faqItem';
 import { faqPage } from './faqPage';
 import { form } from './form';
+import { formQuestion } from './formQuestion';
 import { homePage } from './homePage';
 import { ministry } from './ministry';
 import { navLink } from './navLink';
@@ -37,6 +38,9 @@ export const schemaTypes = [
   embed,
   // Shared menu link (header menu, footer columns, small print, header button)
   navLink,
+  // One editor-written form question (sectionForm.fields). Named formQuestion,
+  // not formField: the `form` document already owns a `formField` array member.
+  formQuestion,
   // Page-builder block library (flexibleSections members)
   ...sectionBlocks,
 

@@ -28,6 +28,7 @@ import {
   CopyIcon,
   SearchIcon,
   ArrowRightIcon,
+  CommentIcon,
 } from '@sanity/icons';
 
 // The only church-specific copy. Swap these when reusing the template.
@@ -698,6 +699,67 @@ export const guides: Guide[] = [
         text: 'You are choosing from set brand options, not raw colors, so whatever you pick looks like it belongs. More on that in the brand guide.',
       },
       { kind: 'seealso', items: ['The brand: colors & fonts', 'Photos & images'] },
+    ],
+  },
+
+  // -------------------------------------------------------------------------
+  {
+    slug: 'build-a-form',
+    title: 'Build your own form',
+    icon: CommentIcon,
+    lead: 'Ask visitors your own questions on any page, without asking anyone to build a form for you.',
+    diy: 'self',
+    body: [
+      { kind: 'path', items: ['Edit a page', 'Sections', 'Add item', 'Form'] },
+      {
+        kind: 'p',
+        text: 'A **Form** section can work two ways. The quick way is to write your questions right there in the section. The other way is to point it at a saved **Form** document, which is worth doing when the same form belongs on several pages.',
+      },
+      { kind: 'h', text: 'Write your own questions' },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page, scroll to **Sections**, and click **Add item**, then **Form**.',
+          'Give it a **Heading** and an **Intro** if you want words above the form.',
+          'Under **Your own questions**, click **Add item**.',
+          'Type the **Question**, for example "Which service do you usually attend?".',
+          'Pick the **Answer type**: short text, email address, phone number, long text, a list to choose from, or a yes / no tick box.',
+          'If you picked a list, add your **Choices**, one per line.',
+          'Turn on **Must be answered** if the visitor cannot send the form without it.',
+          'Add up to 12 questions, then **Publish**.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Name, email, and phone are always there',
+        text: 'You never have to add them. Every form starts with those three boxes, so you always have a way to reply. Your questions come after them.',
+      },
+      { kind: 'h', text: 'Where the answers go' },
+      {
+        kind: 'p',
+        text: 'The answers arrive in the same email as every other form on the site, one line per question. Nothing has to be set up again when you add a question.',
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'Twelve questions is the limit',
+        text: 'That is on purpose. A long form is the fastest way to lose the person filling it in. If you need more than twelve, it is usually two forms, or a conversation.',
+      },
+      { kind: 'h', text: 'Change or remove a question' },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page and find the **Form** section.',
+          'Click the question to edit its words, drag it by the handle to reorder, or use the menu on the right to remove it.',
+          'Click **Publish**. The form on the site changes right away.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: `Stuck, or want a form that does something the questions here cannot? Email ${CHURCH.contactName} at ${CHURCH.contactEmail}.`,
+      },
+      { kind: 'seealso', items: ['Sections: build a page', 'Edit a page'] },
     ],
   },
 

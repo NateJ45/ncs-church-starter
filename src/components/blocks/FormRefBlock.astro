@@ -1,18 +1,35 @@
 ---
-// Form block. Drops a referenced, configurable form into a page section.
+// Form block. Drops a form into a page section, one of two ways:
+//   1. The editor wrote their own questions on the section (block.fields).
+//      QuestionsForm builds the form and always leads with name/email/phone.
+//   2. No questions: the section shows the Form DOCUMENT it points at, exactly
+//      as it always has. This path is byte-for-byte unchanged.
 import FormBlock from '@/components/FormBlock.astro';
+import QuestionsForm from '@/components/QuestionsForm';
+import { normalizeCustomFields } from '@/lib/custom-form-fields';
 
 const { block, fallbackEmail } = Astro.props as { block: any; fallbackEmail?: string };
+
+const questions = normalizeCustomFields(block?.fields);
 ---
 
 {
-  block?.form && (
+  (block?.form || questions.length > 0) && (
     <section class="surface-warm bg-muted">
       <div class="mx-auto max-w-3xl px-m py-section-md">
         {block.heading && <h2 class="font-display text-h2 text-foreground">{block.heading}</h2>}
         {block.intro && <p class="mt-s text-foreground/80 leading-relaxed">{block.intro}</p>}
         <div class="mt-l">
-          <FormBlock form={block.form} fallbackEmail={fallbackEmail} />
+          {questions.length > 0 ? (
+            <QuestionsForm
+              client:visible
+              questions={questions}
+              fallbackEmail={fallbackEmail}
+              title={block.heading}
+            />
+          ) : (
+            <FormBlock form={block.form} fallbackEmail={fallbackEmail} />
+          )}
         </div>
       </div>
     </section>
