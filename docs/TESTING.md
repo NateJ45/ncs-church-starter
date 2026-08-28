@@ -15,14 +15,14 @@ empty `.env`, because that is the state every fork starts in.
 
 ## The gates
 
-| Command | What it actually proves |
-|---|---|
-| `npm run lint` | ESLint over the repo (`src`, `scripts`, astro files). Style and obvious footguns only. |
-| `npm run typegen` | `sanity schema extract --force && sanity typegen generate`. Regenerates `schema.json` and `src/lib/sanity.types.ts`. Also a schema smoke test: the extract fails loudly on a malformed schema type. |
-| `npm run build` | The whole site renders with **no Sanity credentials**, AND the embedded Studio bundles. `sanityFetch()` detects the unset `PUBLIC_SANITY_PROJECT_ID` and returns empty-state fallbacks, so a green build proves every page survives its own empty state. `prebuild` runs `free-dist.mjs` first (Windows only); `build` goes through `with-workerd.mjs` (Windows only). |
-| `npm test` | Node's built-in runner over `src/lib/*.test.ts`. 60 tests as of 2026-08-28. |
-| `npm run parity compare` | Rendered HTML is unchanged versus the committed baseline. |
-| `npm run sync-check` | This repo's canonical copies have not drifted from the library of record. |
+| Command                  | What it actually proves                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run lint`           | ESLint over the repo (`src`, `scripts`, astro files). Style and obvious footguns only.                                                                                                                                                                                                                                                                                 |
+| `npm run typegen`        | `sanity schema extract --force && sanity typegen generate`. Regenerates `schema.json` and `src/lib/sanity.types.ts`. Also a schema smoke test: the extract fails loudly on a malformed schema type.                                                                                                                                                                    |
+| `npm run build`          | The whole site renders with **no Sanity credentials**, AND the embedded Studio bundles. `sanityFetch()` detects the unset `PUBLIC_SANITY_PROJECT_ID` and returns empty-state fallbacks, so a green build proves every page survives its own empty state. `prebuild` runs `free-dist.mjs` first (Windows only); `build` goes through `with-workerd.mjs` (Windows only). |
+| `npm test`               | Node's built-in runner over `src/lib/*.test.ts`. 72 tests as of 2026-08-28 (60, plus the 12 in `redirects.test.ts` that pin the path arithmetic the Studio and the build must agree on).                                                                                                                                                                               |
+| `npm run parity compare` | Rendered HTML is unchanged versus the committed baseline.                                                                                                                                                                                                                                                                                                              |
+| `npm run sync-check`     | This repo's canonical copies have not drifted from the library of record.                                                                                                                                                                                                                                                                                              |
 
 There is no separate Studio build step any more: `astro build` builds the Studio
 as part of the site (`@sanity/astro` mounts it at `/studio`). A standalone
@@ -82,6 +82,13 @@ runs the `.ts` directly; there is no build step and no test framework.
 - **`slugify.test.ts`** - URL slug generation.
 - **`utils.test.ts`** - reading-time estimation from Portable Text, and `tel:`
   href construction.
+- **`redirects.test.ts`** - the path arithmetic behind Pages -> Redirects
+  (PORTS.md card 22). `src/lib/redirects.ts` is imported by BOTH the build
+  (`astro.config.mjs`, which turns published `redirect` documents into Astro's
+  redirects map) and the Studio (the publish action that files a redirect when a
+  page's web address changes). If the two disagreed about what `/old-page/`
+  means, an auto-filed redirect would sit in the Studio looking correct and never
+  fire, which no other gate would notice.
 
 Add a new suite as `src/lib/<name>.test.ts` and it is picked up automatically by
 the glob.
@@ -111,7 +118,7 @@ npm run parity compare   # PASS/DIFF per page, exit 1 on any diff
   for the same reason.)
 - **Why they were re-captured twice on 2026-08-28**, with the diff classes
   enumerated first each time, because a silent re-capture defeats the harness:
-  1. *The Astro 6.4.2 -> 7.2.9 upgrade.* Five classes, all build churn: the
+  1. _The Astro 6.4.2 -> 7.2.9 upgrade._ Five classes, all build churn: the
      `generator` meta string; `<astro-island uid>` (Astro 7 derives it
      differently; the normalizer folds `prefix` but not `uid`); the minified
      inline module scripts (new bundler and minifier: different identifier
@@ -122,14 +129,14 @@ npm run parity compare   # PASS/DIFF per page, exit 1 on any diff
      the per-page element histograms are identical, the visible text with tags
      stripped is byte-identical on all 19 pages, and every `class` attribute
      matches once `&amp;` is decoded. Nothing structural moved.
-  2. *The clean lockfile re-resolve that came with Sanity 6.4.* Two classes: a
+  2. _The clean lockfile re-resolve that came with Sanity 6.4._ Two classes: a
      `data-react-aria-top-layer` attribute on `sonner`'s notification region
      (react-aria floated forward), and the `uid` of that one island.
 - **The in-canvas section controls are gated by this harness.** `Sections.astro`
   wraps each section in a `data-sanity` div ONLY when the preview passes
   `editDoc`; on the live pages the wrapper is a `Fragment`, which renders
   nothing. 20/20 PASS with the feature installed is the proof.
-- Re-capture whenever a markup change is *intended*, and say so in the commit
+- Re-capture whenever a markup change is _intended_, and say so in the commit
   message. A silent re-capture defeats the entire harness.
 - The normalizer strips exactly four classes of build-varying value (`/_astro/`
   content hashes, `data-astro-cid-*` and transition-scope hashes, the
@@ -170,7 +177,7 @@ pull the starter's copy forward.
   build time, and so is the two-module-instance failure. A green build does not
   mean a working desk. Open `/studio` in a real browser after any schema or
   Sanity-dependency change. Verified this way 2026-08-28: under `npm run
-  preview`, `/studio` mounts and renders Sanity's own "Project not found" screen
+preview`, `/studio` mounts and renders Sanity's own "Project not found" screen
   for `placeholder-project-id`, which is the correct behaviour for a template
   with no project and is also proof the React shell and its theme context came
   up.

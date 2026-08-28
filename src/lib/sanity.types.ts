@@ -286,6 +286,18 @@ export type SectionFaqListBackgroundImage = {
   _type: 'image';
 };
 
+export type Redirect = {
+  _id: string;
+  _type: 'redirect';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  from?: string;
+  to?: string;
+  permanent?: boolean;
+  note?: string;
+};
+
 export type SanityFileAssetReference = {
   _ref: string;
   _type: 'reference';
@@ -1463,6 +1475,8 @@ export type Page = {
         _key: string;
       } & Embed)
   >;
+  archived?: boolean;
+  seoPreview?: string;
   seoTitle?: string;
   seoDescription?: string;
   seoImage?: {
@@ -1473,6 +1487,7 @@ export type Page = {
     alt?: string;
     _type: 'image';
   };
+  hideFromSearch?: boolean;
   publishAt?: string;
 };
 
@@ -3483,6 +3498,7 @@ export type AllSanitySchemaTypes =
   | SectionCtaBandBackgroundImage
   | SectionFaqListBackground
   | SectionFaqListBackgroundImage
+  | Redirect
   | SanityFileAssetReference
   | WorshipResource
   | Announcement

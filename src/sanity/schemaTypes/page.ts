@@ -6,6 +6,7 @@
 import { defineType, defineField } from 'sanity';
 import { FLEXIBLE_SECTION_MEMBERS, sectionArrayOptions } from './blocks';
 import { PUBLISH_AT_GROUP, publishAtField } from './_publishAt';
+import { seoFields } from './_seoFields';
 
 export const page = defineType({
   name: 'page',
@@ -15,7 +16,7 @@ export const page = defineType({
     // No `default: true` → the form opens on the implicit "All fields" tab.
     { name: 'hero', title: 'Hero' },
     { name: 'content', title: 'Sections' },
-    { name: 'seo', title: 'SEO' },
+    { name: 'seo', title: 'Search & sharing' },
     PUBLISH_AT_GROUP,
   ],
   fields: [
@@ -64,40 +65,66 @@ export const page = defineType({
       // plain-language groups instead of one flat list of type names.
       options: sectionArrayOptions,
     }),
+    // Archived: a real "put it away", not a delete. The document stays exactly
+    // as it is, and every live-site query skips it (`archived != true`, so a
+    // page made before this field existed stays visible). Nothing
+    // reference-blocks it, and Restore brings the page back unchanged. Set from
+    // the publish menu (components/pageActions.tsx), so it sits in the Sections
+    // group rather than in front of the secretary every edit.
     defineField({
-      name: 'seoTitle',
-      title: 'SEO title',
-      type: 'string',
-      group: 'seo',
-      validation: (Rule) =>
-        Rule.max(60).warning('Titles longer than ~60 characters get cut off in Google.'),
+      name: 'archived',
+      title: 'Archived',
+      type: 'boolean',
+      group: 'content',
+      description:
+        'Archived pages come off the site but are kept here so they can be restored. Publish after changing this.',
     }),
-    defineField({
-      name: 'seoDescription',
-      title: 'SEO description',
-      type: 'text',
-      rows: 3,
+
+    // The whole "Search & sharing" group, in one order, from the shared helper.
+    // The three fields this page already had are passed back in by REFERENCE so
+    // their names and wording never change; the helper adds the live snippet
+    // preview and the "keep this page out of Google" switch. See ./_seoFields.ts.
+    ...seoFields({
       group: 'seo',
-      validation: (Rule) =>
-        Rule.max(160).warning('Descriptions longer than ~160 characters get cut off in Google.'),
-    }),
-    defineField({
-      name: 'seoImage',
-      title: 'Social share image',
-      type: 'image',
-      group: 'seo',
-      options: { hotspot: true },
-      fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
+      reuse: {
+        title: defineField({
+          name: 'seoTitle',
+          title: 'SEO title',
+          type: 'string',
+          group: 'seo',
+          validation: (Rule) =>
+            Rule.max(60).warning('Titles longer than ~60 characters get cut off in Google.'),
+        }),
+        description: defineField({
+          name: 'seoDescription',
+          title: 'SEO description',
+          type: 'text',
+          rows: 3,
+          group: 'seo',
+          validation: (Rule) =>
+            Rule.max(160).warning(
+              'Descriptions longer than ~160 characters get cut off in Google.',
+            ),
+        }),
+        image: defineField({
+          name: 'seoImage',
+          title: 'Social share image',
+          type: 'image',
+          group: 'seo',
+          options: { hotspot: true },
+          fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
+        }),
+      },
     }),
 
     // Free-tier scheduled publishing; see ./_publishAt.ts.
     publishAtField(),
   ],
   preview: {
-    select: { title: 'title', slug: 'slug.current' },
-    prepare: ({ title, slug }) => ({
+    select: { title: 'title', slug: 'slug.current', archived: 'archived' },
+    prepare: ({ title, slug, archived }) => ({
       title: title || 'Page',
-      subtitle: slug ? `/${slug}` : 'no slug yet',
+      subtitle: archived ? `Archived  ·  /${slug ?? '...'}` : slug ? `/${slug}` : 'no slug yet',
     }),
   },
 });

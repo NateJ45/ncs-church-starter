@@ -64,7 +64,8 @@ export const SECTION_MEMBERS = `{
 // into a projection that adds children (navItems' dropdown groups).
 const NAV_LINK_FIELDS = `_key, _type, label, linkType, href, externalUrl,
     "slug": internalPage->slug.current,
-    "docType": internalPage->_type`;
+    "docType": internalPage->_type,
+    "pageArchived": internalPage->archived`;
 export const NAV_LINK_PROJECTION = `{ ${NAV_LINK_FIELDS} }`;
 
 // ---- Site settings (used in BaseLayout / Header / Footer) -----------------
@@ -436,7 +437,7 @@ export async function getPageBySlug(slug: string) {
     title, "slug": slug.current,
     heroEyebrow, heroHeadline, heroSubhead,
     heroImage${IMAGE_PROJECTION},
-    seoTitle, seoDescription, seoImage${IMAGE_PROJECTION},
+    seoTitle, seoDescription, hideFromSearch, seoImage${IMAGE_PROJECTION},
     sections[]${SECTION_MEMBERS}
   }`,
     { slug },
@@ -444,9 +445,12 @@ export async function getPageBySlug(slug: string) {
   );
 }
 
+// `archived != true`, never `archived == false`: a page made before the archive
+// field existed has no value there and must stay visible. An archived page is
+// simply not built, so its URL 404s and never reaches the sitemap.
 export async function getAllPageSlugs(): Promise<string[]> {
   const list: Array<{ slug: string }> = await sanityFetch(
-    `*[_type == "page" && defined(slug.current)]{ "slug": slug.current }`,
+    `*[_type == "page" && defined(slug.current) && archived != true]{ "slug": slug.current }`,
     {},
     [],
   );

@@ -12,15 +12,15 @@ Hardcoded constants that don't change between deploys: domain name, GitHub repo 
 
 ```ts
 // rebrand.mjs stamps `_name` and `_domain`; derived fields auto-update.
-const _name   = "First Church of Springfield";
-const _domain = "example-church.org";
-const _slug   = slugifyName(_name); // "first-church-of-springfield"
+const _name = 'First Church of Springfield';
+const _domain = 'example-church.org';
+const _slug = slugifyName(_name); // "first-church-of-springfield"
 
 export const site = {
   name: _name,
   domain: _domain,
   url: `https://www.${_domain}`,
-  storageKeyPrefix: _slug,        // derived — never needs manual editing
+  storageKeyPrefix: _slug, // derived — never needs manual editing
   themeStorageKey: _slug + '-theme',
   // ... etc
 } as const;
@@ -43,9 +43,11 @@ The inline strings in `src/pages/*.astro` are **safety-net fallbacks** (the inli
 > are not active for this project.
 
 **Settings and globals:**
+
 - `siteSettings` (singleton) — church name, tagline, mission, public email + phone, **street address** (`addressLine` + `cityStateZip`), social links, service time; a **Navigation (menus)** group (`navItems` header menu + `footerColumns` footer columns); a **`favicon`** image; a **Connect & integrations** group (watch / give / app / directory / registration / prayer URLs); and a newsletter config. Phone + address surface site-wide (tap-to-call, header bar, footer, map links) and feed the LocalBusiness JSON-LD. Every field falls back to `src/data/site.ts` when blank.
 
 **Reusable collections:**
+
 - `event` — calendar + special/seasonal services (audience, cost, registration, contact, `featuredOnHome`, `specialService` + `liturgicalSeason`).
 - `sermon` — messages shown on `/sermons` (date, speaker, scripture, series string, video link).
 - `staffMember` — pastors & staff (drives `/pastor-staff`).
@@ -57,6 +59,7 @@ The inline strings in `src/pages/*.astro` are **safety-net fallbacks** (the inli
 - `ctaBlock` — reusable object type (label + linkType + target) embedded in other schemas.
 
 **Page singletons:**
+
 - Core: `homePage`, `aboutPage`, `faqPage`, `contactPage`, `eventsPage`, `sermonsPage`, `privacyPage`, `notFoundPage`.
 - Per-page church singletons (via the `definePageSingleton` factory): `worshipPage` (I'm New), `beliefsPage` (What We Believe), `musicPage`, `staffPage`, `growPage`, `servePage`, `kidsPage`, `foodPage`, `useOurSpacePage`, `weddingsPage`, `givePage`.
 - `page` — generic type for brand-new pages at `/<slug>`, built entirely from the block library.
@@ -85,7 +88,7 @@ PUBLIC_SANITY_DATASET=production
 export async function sanityFetch<T>(
   query: string,
   params: Record<string, unknown> = {},
-  fallback: T
+  fallback: T,
 ): Promise<T> {
   if (isSanityUnconfigured()) return fallback;
   return client.fetch<T>(query, params);
@@ -121,6 +124,7 @@ All GROQ queries live in `src/lib/queries.ts`. Each page has a typed query funct
 ### Auto-populated lists
 
 Several pages pull their content from collections automatically:
+
 - Events on `/events`: upcoming `event` documents by date; `specialService` ones surface in the Special Services band; `featuredOnHome` ones appear on the home page.
 - Sermons on `/sermons`: recent `sermon` documents, newest first (the latest is featured).
 - FAQs on the FAQ page: `faqItem` documents grouped by `category`, in the order defined in `faqPage.categoryOrder`.
@@ -138,10 +142,12 @@ This means adding an `event` with `featuredOnHome: true` makes it appear on both
 Two schema-level controls govern what Canvas sees:
 
 **Excluded from Canvas entirely** (`options.canvasApp.exclude: true`):
+
 - All page singletons + the generic `page` -- marketing copy is structural; edit fields directly in Studio.
 - `siteSettings` -- configuration, not prose.
 
 **Available in Canvas with per-field voice hints** (`options.canvasApp.purpose`):
+
 - `faqItem` -- question, answer (the `purpose` strings carry the warm, plain-English church voice).
 
 The `purpose` strings carry compressed voice guidance for each field. These are NOT a hard guardrail -- editors should still apply the project voice in review.
@@ -149,3 +155,28 @@ The `purpose` strings carry compressed voice guidance for each field. These are 
 **Deploying Canvas annotation changes:** deploy the site. Canvas reads the deployed Studio schema, and the Studio deploys with the site now, so new `canvasApp.purpose` or `exclude` changes take effect on the next site deploy.
 
 **Activating Canvas** for the project (one-time): the toggle lives in [manage.sanity.io](https://manage.sanity.io) under the project's Canvas section.
+
+## Pages as first-class objects (PORTS.md cards 21 and 22)
+
+The `page` document type carries three verbs and one extra field beyond its content:
+
+- **Duplicate** and **Archive / Restore** live in the publish menu
+  (`src/sanity/components/pageActions.tsx`), backed by plain functions in
+  `src/sanity/pageOps.ts`. Duplicate makes a DRAFT copy at a free web address with every
+  nested array `_key` regenerated; the stock Sanity `duplicate` action is filtered out for
+  `page` because it copies the slug and produces two documents at one address.
+- **`archived`** is a boolean, not a delete. Every live-site query tests `archived != true`
+  (never `== false`, so a page made before the field existed stays visible): the route list
+  in `getAllPageSlugs`, the nav-link projection plus `navHref`, and the sitemap read in
+  `astro.config.mjs`. Archive and Restore both need a **Publish** afterwards, because the
+  site is rebuilt from published content. Archiving patches both the draft and the
+  published twin, and only the twins that actually exist (a patch against a missing id
+  fails the whole transaction).
+- The **`redirect`** document type (Pages -> Redirects) holds old-address forwards. They
+  are read at build time and emitted as real 301/302s by the Cloudflare adapter, and one is
+  filed automatically whenever a published page's web address changes
+  (`src/sanity/components/slugRedirect.tsx`, which wraps the stock Publish action and never
+  blocks it). See `docs/agent/seo.md`.
+
+Page SINGLETONS deliberately get none of this: one-per-site means duplicating or archiving
+one would leave the site with a route and no document.

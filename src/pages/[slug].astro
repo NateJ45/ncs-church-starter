@@ -34,9 +34,12 @@ const settings = resolveSiteSettings(siteSettings);
 
 const title = page?.seoTitle ?? page?.title ?? site.name;
 const description = page?.seoDescription ?? '';
+// "Keep this page out of Google" (page.hideFromSearch). The other half of that
+// switch is the sitemap filter in astro.config.mjs, which drops the same page.
+const noindex = page?.hideFromSearch === true;
 ---
 
-<BaseLayout {title} {description} {siteSettings} seoImage={page?.seoImage}>
+<BaseLayout {title} {description} {siteSettings} {noindex} seoImage={page?.seoImage}>
   <Hero
     eyebrow={page?.heroEyebrow ?? ''}
     headline={page?.heroHeadline ?? page?.title ?? ''}

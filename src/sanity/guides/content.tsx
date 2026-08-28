@@ -25,6 +25,9 @@ import {
   ColorWheelIcon,
   InfoOutlineIcon,
   MenuIcon,
+  CopyIcon,
+  SearchIcon,
+  ArrowRightIcon,
 } from '@sanity/icons';
 
 // The only church-specific copy. Swap these when reusing the template.
@@ -387,6 +390,166 @@ export const guides: Guide[] = [
     ],
   },
 
+  // 8a ---------------------------------------------------------------------
+  {
+    slug: 'copy-or-put-away',
+    title: 'Copy a page, or put one away',
+    icon: CopyIcon,
+    lead: 'Start a new page from one you already like, and take an old page off the site without losing it.',
+    diy: 'self',
+    body: [
+      { kind: 'path', items: ['Pages', 'Custom Pages', 'open a page', 'the publish menu'] },
+      { kind: 'h', text: 'Copy a page' },
+      {
+        kind: 'p',
+        text: "Last year's Vacation Bible School page is the fastest way to make this year's. Copying gives you the whole layout, so you only change the words and the dates.",
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page you want to copy.',
+          'Click the small arrow next to the **Publish** button, then **Duplicate**.',
+          'The copy opens straight away. It is called "... copy" and it sits at a new web address ending in "-copy".',
+          'Change the title, the web address, and anything else you want.',
+          'Publish when you are ready.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'A copy is never live by accident',
+        text: 'The copy starts as a draft. Nobody can see it until you press Publish, so you can take as long as you like over it.',
+      },
+
+      { kind: 'h', text: 'Put a page away (Archive)' },
+      {
+        kind: 'p',
+        text: 'When an event is over, you rarely want the page deleted. You want it off the site, and back next year. That is Archive.',
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page.',
+          'Click the small arrow next to the **Publish** button, then **Archive**.',
+          'Press **Publish**. The page comes off the site at the next update, and any menu link to it disappears too.',
+        ],
+      },
+      {
+        kind: 'h',
+        text: 'Bring it back (Restore)',
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page. It is still in **Custom Pages**, marked "Archived".',
+          'Click the arrow next to **Publish**, then **Restore**.',
+          'Press **Publish**. The page is back exactly as it was.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'Archive, do not delete',
+        text: 'Deleting throws the words and the layout away for good, and it is refused while anything still links to the page. Archiving keeps everything and can be undone in two clicks.',
+      },
+      { kind: 'seealso', items: ['Build a brand-new page', 'Renamed links keep working'] },
+    ],
+  },
+
+  // 8b ---------------------------------------------------------------------
+  {
+    slug: 'search-and-sharing',
+    title: 'How your page looks in Google',
+    icon: SearchIcon,
+    lead: 'Set the title and the sentence people read in search results, and see both before you publish.',
+    diy: 'self',
+    body: [
+      { kind: 'path', items: ['Pages', 'Custom Pages', 'open a page', 'Search & sharing'] },
+      {
+        kind: 'p',
+        text: 'Every page has a **Search & sharing** tab. At the top of it is a picture of your page as Google shows it, and as a text message or a Facebook post shows it. Both update as you type.',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          '**SEO title**: the blue line in Google and the name on the browser tab. Around 60 characters. Leave it blank to use the page title.',
+          '**SEO description**: the grey sentence under it. Around 160 characters. Write it for a person, not for a search engine.',
+          '**Social share image**: the picture people see when the page is shared. A wide photo works best.',
+          '**Keep this page out of Google**: see below.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'The counter is there to help',
+        text: 'Each of those two boxes shows how many characters you have used. Green is healthy, amber is close to the limit, red means Google will cut the end off.',
+      },
+      { kind: 'h', text: 'Keeping a page out of Google' },
+      {
+        kind: 'p',
+        text: 'Turn on **Keep this page out of Google** for a page that should exist but should not be found by searching, like a form you only send by email.',
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'It is not a lock',
+        text: 'The page is still on the site, and anyone who has the address can still open it. It only asks search engines to skip it.',
+      },
+      { kind: 'seealso', items: ['Photos & images', 'Build a brand-new page'] },
+    ],
+  },
+
+  // 8c ---------------------------------------------------------------------
+  {
+    slug: 'renamed-links',
+    title: 'Renamed links keep working',
+    icon: ArrowRightIcon,
+    lead: 'Change a page address and the old one still takes people to the right place.',
+    diy: 'self',
+    body: [
+      { kind: 'path', items: ['Pages', 'Custom Pages', 'Redirects (old links)'] },
+      {
+        kind: 'p',
+        text: 'A web address that has been printed on a bulletin, saved as a bookmark, or listed in Google does not change when you rename the page. Without help it would land on a "page not found".',
+      },
+      { kind: 'h', text: 'This happens for you' },
+      {
+        kind: 'steps',
+        items: [
+          'Change the **Slug** on a page that is already live.',
+          'Press **Publish**.',
+          'A note appears saying the old link was kept working. Nothing else to do.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'You can see every forward under **Pages**, then **Redirects (old links)**. Each one says where people used to go and where they are sent now.',
+      },
+      { kind: 'h', text: 'Adding one by hand' },
+      {
+        kind: 'p',
+        text: 'Do this for an address that never existed on this site: a link from an old website, or one printed on a card.',
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Open **Redirects (old links)**, then **+**.',
+          'In **Old address**, type the address people are still using, starting with a slash, like "/vbs2025".',
+          'In **Send them to**, type the page it should go to, like "/vbs", or a full https:// link.',
+          'Leave **Permanent move?** on unless the forward is only for a few weeks.',
+          'Publish.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'It takes effect on the next site update',
+        text: 'Forwards are built into the site, so a new one is live a couple of minutes after you publish, like any other change.',
+      },
+      { kind: 'seealso', items: ['Copy a page, or put one away', 'Build a brand-new page'] },
+    ],
+  },
+
   // 9 ---------------------------------------------------------------------- (editable nav)
   {
     slug: 'top-menu',
@@ -723,7 +886,7 @@ export const guides: Guide[] = [
         kind: 'bullets',
         items: [
           'Needing a new kind of field, or a new kind of section that does not exist yet.',
-          'Web address changes, redirects, the domain, or email and DNS settings.',
+          'The domain itself, or email and DNS settings. (Changing one page address is now yours: see Renamed links keep working.)',
           'Adding a new outside tool (a new giving, calendar, or streaming embed).',
           'The What We Believe statement of faith (that comes from leadership).',
           'Anything that shows an error, or any screen that looks like code.',
