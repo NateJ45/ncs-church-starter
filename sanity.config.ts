@@ -44,6 +44,11 @@ import {
   PAGE_OPS_TYPES,
 } from './src/sanity/components/pageActions';
 import { withSlugRedirect } from './src/sanity/components/slugRedirect';
+import { SaveSectionPresetAction } from './src/sanity/actions/saveSectionPreset';
+import { CheckPageAction } from './src/sanity/actions/checkPage';
+import { AddPresetToPageAction } from './src/sanity/actions/addPresetToPage';
+import { UndoAction, RedoAction, undoRedoShortcuts } from './src/sanity/components/UndoRedo';
+import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
 
 // =============================================================================
 // Studio theme
@@ -159,6 +164,16 @@ export default defineConfig({
     // Vision (GROQ query runner) is a developer tool, not an editor tool.
     // Gate it to local dev so it doesn't clutter the deployed Studio.
     ...(IS_DEV ? [visionTool()] : []),
+    // Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y (Cmd on a Mac) for everything that is not
+    // typing: sections added, dragged or removed, photos cleared, backgrounds
+    // changed (PORTS.md card 27). The buttons are the two document actions in
+    // the resolver below; this plugin adds only the keyboard layer, and it
+    // stays out of text boxes so their own undo keeps working. It contributes a
+    // SECOND studio.components.layout. Sanity composes layout components
+    // middleware-style, so it wraps around StudioLayout above rather than
+    // replacing it - both call renderDefault. See
+    // src/sanity/components/UndoRedo.tsx.
+    undoRedoShortcuts(),
   ],
 
   schema: {
@@ -203,7 +218,36 @@ export default defineConfig({
       // page of its own; the action returns null for the rest, so appending it
       // unconditionally is safe. See src/sanity/components/shareDraftLink.tsx.
       // The two page actions return null for every type but `page`.
-      return [...base, duplicatePageAction, archivePageAction, shareDraftLinkAction];
+      //
+      // Page-builder helpers (PORTS.md cards 24 + 25): "Save a section as
+      // preset..." keeps one band of this page for reuse, and "Check this
+      // page..." reads the draft back for missing photo descriptions, empty
+      // sections and odd links. Both are offered wherever a page-builder array
+      // exists, which is one list in src/sanity/pageBuilderConfig.ts. The
+      // singletons and the generic `page` share that list, so this is wired
+      // once rather than per type.
+      //
+      // "Add to a page..." is the other half of the saved-section pair, and it
+      // hangs on the saved section itself: this template has no navigator panel
+      // to offer it from. The action returns null for every other type.
+      //
+      // Undo / Redo (PORTS.md card 27) ride with the same list: a page is where
+      // a mis-drag or a wrong background actually costs something. They come
+      // FIRST among the added actions, so the step back sits at the top of the
+      // menu where an editor looks for it. The keyboard shortcut is registered
+      // separately, by the plugin above.
+      const pageHelpers = PAGE_BUILDER_TYPES.has(schemaType)
+        ? [UndoAction, RedoAction, SaveSectionPresetAction, CheckPageAction]
+        : [];
+
+      return [
+        ...base,
+        duplicatePageAction,
+        archivePageAction,
+        ...pageHelpers,
+        AddPresetToPageAction,
+        shareDraftLinkAction,
+      ];
     },
   },
 });

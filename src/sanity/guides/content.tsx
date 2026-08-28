@@ -30,6 +30,7 @@ import {
   ArrowRightIcon,
   CommentIcon,
   SparkleIcon,
+  UndoIcon,
 } from '@sanity/icons';
 
 // The only church-specific copy. Swap these when reusing the template.
@@ -709,7 +710,12 @@ export const guides: Guide[] = [
       },
       {
         kind: 'seealso',
-        items: ['Change how a section looks', 'The brand: colors & fonts', 'Photos & images'],
+        items: [
+          'Undo a change',
+          'Change how a section looks',
+          'The brand: colors & fonts',
+          'Photos & images',
+        ],
       },
     ],
   },
@@ -909,6 +915,59 @@ export const guides: Guide[] = [
         text: 'Some photos are decoration and genuinely need no description. A link it questions may be perfectly fine. It also skips sections that fill themselves from a list (an FAQ list, a dynamic list, a form), because their words live elsewhere, so it will never tell you one of those is empty.',
       },
       { kind: 'seealso', items: ['Photos & images', 'Add & arrange sections'] },
+    ],
+  },
+
+  // -------------------------------------------------------------------------
+  {
+    slug: 'undo-a-change',
+    title: 'Undo a change',
+    icon: UndoIcon,
+    lead: 'Dragged a section to the wrong place, removed the wrong one, or picked a background you regret? Step it back.',
+    diy: 'self',
+    body: [
+      { kind: 'path', items: ['a page', 'the arrow beside Publish', 'Undo last change'] },
+      {
+        kind: 'p',
+        text: 'Click the small arrow beside `Publish` and choose **Undo last change**. The page goes back to how it was one step ago. Choose **Redo** to put it back again if you change your mind.',
+      },
+      { kind: 'h', text: 'Ctrl+Z works too, outside text boxes' },
+      {
+        kind: 'p',
+        text: 'With a page open, press **Ctrl+Z** (**Cmd+Z** on a Mac) to undo and **Ctrl+Shift+Z** to redo. Press it more than once to go back more than one step.',
+      },
+      {
+        kind: 'callout',
+        tone: 'default',
+        title: 'Inside a text box, the text box wins',
+        text: 'If your cursor is in a heading, a paragraph or any other box you type in, Ctrl+Z undoes your typing, the way it does everywhere else. That is on purpose. Click outside the box first if you want to undo the bigger thing, like the section you just dragged.',
+      },
+      { kind: 'h', text: 'What it can and cannot reach' },
+      {
+        kind: 'bullets',
+        items: [
+          'It works on your **unpublished draft** only. The live website is never touched, so undo can never break what visitors see.',
+          'It covers everything, not just typing: sections added, dragged, duplicated or removed, photos swapped or cleared, backgrounds and options changed.',
+          'It **cannot undo a Publish**. Publishing is its own step. To take a published page back, use **Version history**.',
+          'It forgets everything when you close or reload the tab. Undo is for the last few minutes, not for last week.',
+        ],
+      },
+      { kind: 'h', text: 'When it politely refuses' },
+      {
+        kind: 'bullets',
+        items: [
+          '**"Nothing to undo yet"**: this page has no unpublished change for undo to step back to.',
+          '**"Someone else edited since"**: the page changed after the last thing you did, so undo left it alone rather than writing over somebody. Reload the page and look at it before doing anything else.',
+          '**"This would remove the only copy"**: stepping back that far would delete a page that has never been published, so there would be nothing left. If you really do want it gone, delete it on purpose.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Version history is still the deep one',
+        text: 'Undo is the quick step back for the thing you just did. To go back hours or days, or to recover something after publishing, open the page and use **Version history** in the top right. Nothing here replaces it.',
+      },
+      { kind: 'seealso', items: ['Add & arrange sections', 'Change how a section looks'] },
     ],
   },
 
