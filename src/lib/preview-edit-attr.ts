@@ -51,6 +51,31 @@ export function sectionEditAttr(doc: EditDoc, key: string): string {
 }
 
 /**
+ * The `data-sanity` value that targets ONE FIELD INSIDE one section array item
+ * (2026-08-28, card 28).
+ *
+ * THIS EXISTS BECAUSE A BARE ARRAY ITEM CANNOT CARRY A CUSTOM OVERLAY
+ * COMPONENT. `sectionEditAttr` above names the item itself, which is what the
+ * host needs for insert / duplicate / remove / drag. But the host builds the
+ * resolver context for a custom component through `getField(node)`, and the
+ * Studio schema resolves no FIELD for an array item on its own, so a card hung
+ * on that attribute never mounts. (Learned in a deployed Studio on the
+ * presacademy repo; the first version of that layer put its swatches there.)
+ *
+ * So Sections.astro renders a small preview-only handle per section pointing at
+ * a real field - `background.tone` for the appearance card, `headingAccent` for
+ * the accent-word card - and the cards hang off those. `field` is a dotted path
+ * INSIDE the item, so both a plain field and a field on a nested object work.
+ */
+export function sectionFieldEditAttr(doc: EditDoc, key: string, field: string): string {
+  return createDataAttribute({
+    id: doc.id.replace(/^drafts\./, ''),
+    type: doc.type,
+    baseUrl: '/studio',
+  })(`${doc.field ?? 'flexibleSections'}[_key=="${key}"].${field}`).toString();
+}
+
+/**
  * The `data-sanity` value that targets a field on ANY document - the
  * WordPress-template-part gesture (2026-08-28). PreviewLayout wraps the shared
  * Header and Footer in this attribute pointed at `siteSettings`, so in Edit

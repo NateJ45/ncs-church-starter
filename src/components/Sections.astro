@@ -25,7 +25,14 @@ import DynamicListBlock from '@/components/blocks/DynamicListBlock.astro';
 import ArchShowcaseBlock from '@/components/blocks/ArchShowcaseBlock.astro';
 import FaqListBlock from '@/components/blocks/FaqListBlock.astro';
 import EmbedBlock from '@/components/EmbedBlock.astro';
-import { sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
+import { sectionEditAttr, sectionFieldEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
+import {
+  BACKGROUND_FIELD,
+  HEADING_ACCENT_FIELD,
+  SURFACE_FIELD,
+  hasAppearance,
+  headingAccentApplies,
+} from '@/lib/section-fields';
 
 interface Props {
   sections?: any[] | null;
@@ -56,8 +63,39 @@ const { sections = [], fallbackEmail, editDoc } = Astro.props;
 // contents element has none. A plain block-level div around a full-width
 // <section> changes no layout.
 const Wrap = editDoc ? 'div' : Fragment;
+// `position: relative` in preview only, so the handles below can pin themselves
+// to the section's own top-right corner. The wrapper's box IS the section's box,
+// so this changes no layout and no live markup.
 const wrapAttrs = (key: string | undefined) =>
-  editDoc && key ? { 'data-sanity': sectionEditAttr(editDoc, key) } : {};
+  editDoc && key
+    ? { 'data-sanity': sectionEditAttr(editDoc, key), style: 'position:relative' }
+    : {};
+
+// ---------------------------------------------------------------------------
+// The in-canvas handles (PORTS.md card 28) - PREVIEW ONLY, same editDoc gate
+// ---------------------------------------------------------------------------
+// A floating card needs a node the Studio schema resolves to a FIELD. The
+// wrapper above names a bare array item, which resolves to none, so a custom
+// overlay component can never mount on it (see sectionFieldEditAttr). These
+// little squares are those nodes: each points at a real field on the section, so
+// clicking one selects that field and the overlay answers with its card.
+//
+// TOP-RIGHT, INSIDE the band. A section is usually taller than the viewport, so
+// its bottom-right corner is below the fold exactly when the editor is looking
+// at the section; its top-right is on screen the moment the band is. They render
+// after the content so they paint above it, and they carry their styles inline
+// because the preview loads no preview-only stylesheet.
+//
+// Each handle appears only where its control has something to do:
+//   - the palette, for the fifteen types that carry `bgField()`. Not the form
+//     section and not an embed, which have no background object at all;
+//   - the accent word, for the five types that carry `headingAccent` AND only
+//     when the heading actually holds words to offer.
+const handleStyle = (right: string) =>
+  `position:absolute;top:12px;right:${right};z-index:5;width:28px;height:28px;` +
+  'border-radius:999px;background:#ffffff;border:1px solid rgba(31,27,22,0.18);' +
+  'box-shadow:0 2px 8px rgba(22,50,44,0.24);display:flex;align-items:center;' +
+  'justify-content:center;font-size:14px;line-height:1;';
 
 const MAP: Record<string, any> = {
   sectionRichText: RichTextBlock,
@@ -111,6 +149,29 @@ const DEFAULT_TONE: Record<string, string> = {
     ) : (
       <Cmp block={block} fallbackEmail={fallbackEmail} />
     );
-    return <Wrap {...wrapAttrs(block?._key)}>{inner}</Wrap>;
+    const key = block?._key;
+    const styleHandle =
+      editDoc && key && hasAppearance(block._type)
+        ? sectionFieldEditAttr(editDoc, key, `${BACKGROUND_FIELD}.${SURFACE_FIELD}`)
+        : undefined;
+    const accentHandle =
+      editDoc && key && headingAccentApplies(block._type, block)
+        ? sectionFieldEditAttr(editDoc, key, HEADING_ACCENT_FIELD)
+        : undefined;
+    return (
+      <Wrap {...wrapAttrs(key)}>
+        {inner}
+        {styleHandle && (
+          <div data-sanity={styleHandle} data-style-handle title="How this section looks" aria-hidden="true" style={handleStyle('12px')}>
+            &#127912;
+          </div>
+        )}
+        {accentHandle && (
+          <div data-sanity={accentHandle} data-accent-handle title="Accent word" aria-hidden="true" style={`${handleStyle(styleHandle ? '48px' : '12px')}font-weight:800;color:#1E423B;`}>
+            A
+          </div>
+        )}
+      </Wrap>
+    );
   })
 }

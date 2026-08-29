@@ -817,7 +817,117 @@ export const guides: Guide[] = [
         title: 'Do it from the page picture',
         text: 'All of this is easier in **Preview**, where you can see the band change as you pick. Right-click a section on the page picture to reach its menu, or just click the section and its fields open beside it.',
       },
-      { kind: 'seealso', items: ['Add & arrange sections', 'The brand: colors & fonts'] },
+      {
+        kind: 'seealso',
+        items: [
+          'Change a section on the page picture',
+          'Add & arrange sections',
+          'The brand: colors & fonts',
+        ],
+      },
+    ],
+  },
+
+  // -------------------------------------------------------------------------
+  {
+    slug: 'in-canvas-controls',
+    title: 'Change a section on the page picture',
+    icon: ColorWheelIcon,
+    lead: 'Three things you can change without leaving the page picture: how a section looks, which word of a heading is coloured, and the words themselves.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'Open **Preview** (the eye icon at the top of a page). The page picture on the right is the real page, and in **Edit** mode you can change three things right on it. You are still editing a draft, so nothing is public until you press **Publish**.',
+      },
+      {
+        kind: 'callout',
+        tone: 'positive',
+        title: 'Everything here is also in the fields',
+        text: 'Not one of these buttons can do something the form on the left cannot. They are the same three fields, put where you are already looking. If a button ever confuses you, close it and use the fields.',
+      },
+
+      { kind: 'h', text: '1. How this section looks' },
+      {
+        kind: 'steps',
+        items: [
+          'Move your pointer over a section on the page picture. A small round **palette** button appears in its top right corner.',
+          'Click it. A card opens with two lists: **Surface** (the background of the whole band) and **Accent colour** (the small colour inside it).',
+          'Click a colour. The band changes under your pointer straight away.',
+          'Close the card with its ✕, with the **Esc** key, or by clicking anywhere else on the page.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'The colours are the same six surfaces and three accents the **Section background** panel offers in the fields, described one by one in **Change how a section looks**. Nothing here is a colour picker: each choice is a pairing somebody designed, so you cannot land on an unreadable combination.',
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'A photo behind the section wins',
+        text: 'If the section has a background photo or video, the words are always shown in white over the picture and the surface colour is not used at all. The card says so, and offers only the accent. Take the photo out if you want a surface colour back.',
+      },
+      {
+        kind: 'p',
+        text: 'The palette button appears only on sections that have a background to change. The **Form** section and an **Embed** do not have one, so they have no button.',
+      },
+
+      { kind: 'h', text: '2. The accent word in a heading' },
+      {
+        kind: 'steps',
+        items: [
+          'On a section that has a heading, a small round **A** button sits beside the palette button.',
+          'Click it. The card shows the heading again, one button per word.',
+          'Click the word you want. It takes the section accent colour on the page.',
+          'Click the same word again to make the heading plain.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'This is the same **Accent word in the heading** field you can type into, with the typing taken out. Because you click a word out of the heading itself, the word always matches and there is no spelling to check. One word per heading is the rule: two coloured words stop reading as emphasis and start reading as decoration.',
+      },
+      {
+        kind: 'p',
+        text: 'Five kinds of section carry an accent word: **Text section**, **Card grid**, **Call-to-action band**, **Feature cards** and **Media feature**. The **A** button only appears once the heading has something in it.',
+      },
+
+      { kind: 'h', text: '3. Edit the words where they are' },
+      {
+        kind: 'steps',
+        items: [
+          'Click the words you want to change on the page picture. A small **Edit here** button appears in the corner of that line.',
+          'Click it. A box opens with the words already in it.',
+          'Type. Press **Enter** to save, or **Esc** to leave it as it was. Clicking away from the box saves it too.',
+        ],
+      },
+      {
+        kind: 'bullets',
+        items: [
+          'On a **subhead**, **intro** or **body** line the box has a **B** button and an *i* button, so you can bold or italicise part of the sentence. That is all the formatting there is, on purpose.',
+          'On the three **hero** lines at the top of a page (the eyebrow, the headline and the subhead) the box is plain text. **Shift+Enter** makes a new line there.',
+          'Pasting is cleaned as it lands: bold and italic survive, and fonts, colours, sizes and tables are dropped. What you see in the box is what gets saved.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Emptying the box does not delete the line',
+        text: 'Clear a bold-and-italic box and the plain wording that was there before comes back. Nothing is lost. The plain box and the rich box are two halves of the same line.',
+      },
+
+      { kind: 'h', text: 'When a button does not appear' },
+      {
+        kind: 'bullets',
+        items: [
+          'You are in **Browse** mode, not **Edit** mode. Switch at the top of the preview.',
+          'The section does not have that field. Not every section has a background, and only five have an accent word.',
+          'The line is not one of the lines this offers. Long body text with its headings, lists and links is still edited in the fields, where it has its full toolbar.',
+        ],
+      },
+      {
+        kind: 'seealso',
+        items: ['Change how a section looks', 'Add & arrange sections', 'Undo a change'],
+      },
     ],
   },
 

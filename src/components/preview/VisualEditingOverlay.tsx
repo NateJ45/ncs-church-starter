@@ -4,6 +4,7 @@ import type { HistoryAdapter, HistoryRefresh } from '@sanity/visual-editing';
 import { useCallback, useEffect, useRef } from 'react';
 import { SOFT_REFRESH_EVENT, useInstantText } from './overlay/useInstantText.ts';
 import { startTiming } from './overlay/timing.ts';
+import { inCanvasControls } from './overlay/index.ts';
 import {
   createRefreshState,
   onChange as onRefreshChange,
@@ -102,6 +103,12 @@ const mpaHistory: HistoryAdapter = {
 //     render started before it is stale even though no SSE signal has arrived
 //     for it yet. The Studio end of its fast channel is
 //     src/sanity/components/LiveDraftBridge.tsx.
+//  4. IN-CANVAS CONTROLS (card 28): the `components` prop below hands the host a
+//     resolver, so a section handle opens an appearance card, an accent-word
+//     card, and a curated line opens an "Edit here" text card, all inside the
+//     canvas. Every one of them writes through the optimistic document API, so
+//     the edit lands in the draft with the editor's own session and no token
+//     ever reaches this bundle. See ./overlay/index.ts.
 //
 // TIMING. Set `localStorage.previewTiming = '1'` in the preview frame to have
 // both paths log how long they took. See ./overlay/timing.ts.
@@ -375,5 +382,12 @@ export default function VisualEditingOverlay({ pageId }: Props) {
     [pageId, softRefresh],
   );
 
-  return <VisualEditing portal refresh={refresh} history={mpaHistory} />;
+  // `components` is job 4: the FLOATING IN-CANVAS CONTROLS (card 28). The host
+  // calls this resolver for the hovered or focused element and renders whatever
+  // it returns inside that element's overlay box. Returning undefined for
+  // everything it does not recognise is what keeps the rest of the overlay
+  // exactly as it was. See ./overlay/index.ts.
+  return (
+    <VisualEditing portal refresh={refresh} history={mpaHistory} components={inCanvasControls} />
+  );
 }
